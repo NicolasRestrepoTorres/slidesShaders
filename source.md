@@ -1,8 +1,29 @@
+<section id="themes">
+	<h2>Themes</h2>
+		<p>
+			Set your presentation theme: <br>
+			<!-- Hacks to swap themes after the page has loaded. Not flexible and only intended for the reveal.js demo deck. -->
+                        <a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/black.css'); return false;">Black (default)</a> -
+			<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/white.css'); return false;">White</a> -
+			<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/league.css'); return false;">League</a> -
+			<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/sky.css'); return false;">Sky</a> -
+			<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/beige.css'); return false;">Beige</a> -
+			<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/simple.css'); return false;">Simple</a> <br>
+			<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/serif.css'); return false;">Serif</a> -
+			<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/blood.css'); return false;">Blood</a> -
+			<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/night.css'); return false;">Night</a> -
+			<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/moon.css'); return false;">Moon</a> -
+			<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/solarized.css'); return false;">Solarized</a>
+		</p>
+</section>
+
+H:
+
 ## SHADERS IN PROCESSING
 
-Andres Colubri
+Andres Colubri & Jean Pierre Charalambos
 
-
+H:
 
 ## Contents
 
@@ -11,7 +32,7 @@ Andres Colubri
 3. Fragment shaders  <!-- .element: class="fragment" data-fragment-index="3" -->
 4. Vertex lighting <!-- .element: class="fragment" data-fragment-index="4" -->
 
-
+H:
 
 ## Introduction
 
@@ -20,50 +41,50 @@ Andres Colubri
 <li class="fragment">A shader is a program that runs on the GPU (Graphics Processing Unit) and it is controlled by our application (for example a Processing sketch)</li>
 <li class="fragment">The language of the shaders in Processing is GLSL (OpenGL Shading Language)</li>
 
-
+H:
 
 ### What people have done using shaders in Processing?
 
 <li class="fragment">I started my involvment with Processing back in 2007 with a couple of libraries called <a href="http://andrescolubri.net/glgraphics_gsvideo/" target="_blank">GLGraphics and GSVideo</a></li>
 <li class="fragment">In 2013, <a href="http://andrescolubri.net/processing-2/" target="_blank">Processing 2.0</a> was released and incorporated most of the funcionality of GLGraphics and GSVideo, including shaders, into the core of the language</li>
 
-
+H:
 
 ### Generating Utopia, by Stefan Wagner
 
 <iframe src="//player.vimeo.com/video/74066023" width="854" height="510" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 
-
+H:
 
 ### Video portraits, by Sergio Albiac
 
 <iframe src="//player.vimeo.com/video/32760578" width="854" height="510" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 
-
+H:
 
 ### Generative Typography, by Amnon Owed
 
 <iframe src="https://player.vimeo.com/video/101383026" width="854" height="478" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 
-
+H:
 
 ### Unnamed soundsculpture, by Daniel Franke
 
 <iframe src="//player.vimeo.com/video/38840688" width="854" height="510" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 
-
+H:
 
 ### Just Cause 2 visualization, by Jim Blackhurst
 
 <iframe width="854" height="510" src="//www.youtube.com/embed/hEoxaGkNcrg" frameborder="0" allowfullscreen></iframe>
 
-
+H:
 
 ### Latent State, thesis project
 
 <iframe src="//player.vimeo.com/video/4806038" width="854" height="469" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 
-
+H:
 
 ### Shaders with WebGL
 
@@ -72,25 +93,25 @@ Andres Colubri
 
 <a href="http://glslsandbox.com/" target="_blank"><img width="800" src="fig/glslsandbox.png"></a>
 
-
+H:
 
 ### Hello, World!
 
 <img width="600" src="fig/Processing.png">
 
-
+H:
 
 ### The graphics pipeline
 
 <img width="800" src="fig/Processing-pipeline.png">
 
-
+H:
 
 ### The stages of the pipeline
 
 <a href="fig/GPU-pipeline.png" target="_blank"><img height="600" src="fig/GPU-pipeline.png"></a>
 
-
+H:
 
 ### Type of variables in a shader
 
@@ -98,7 +119,7 @@ Andres Colubri
 <li class="fragment">Attribute variables are defined per each vertex, for example the position, normal, and color</li>
 <li class="fragment">The varying variables connect the different stages in the shader</li>
 
-
+H:
 
 ### Shader code
 
@@ -108,7 +129,7 @@ The code for the tutorial in available on <a href="https://github.com/codeantico
 
 The latest vesion of the shader API in Processing is described in <a href="http://codeanticode.wordpress.com/2014/05/08/shader_api_in_processing_2/" target="_blank">this blogpost</a>
 
-
+H:
 
 ### The Book of Shaders, by Patricio Gonzalez Vivo
 
@@ -117,7 +138,7 @@ The latest vesion of the shader API in Processing is described in <a href="http:
 
 <a href="fig/TheBookOfShaders2.png" target="_blank"><img height="600" src="fig/TheBookOfShaders2.png"></a>
 
-
+H:
 
 ### Example 2.1: Toon shader
 
@@ -148,6 +169,7 @@ void draw() {
 }
 ```
 
+V:
 
 The vertex shader:
 
@@ -174,6 +196,7 @@ void main() {
 
 which ones are the uniforms and the attribute variables?
 
+V:
 
 The fragment shader:
 
@@ -203,7 +226,7 @@ void main() {
 }
 ```
 
-
+H:
 
 ### How are the shaders executed by the GPU?
 
@@ -222,7 +245,7 @@ for pixel in screen:
         ouptut_color = fragment_shader(pixel)
 ```
 
-
+H:
 
 ### The chow mein can 
 
@@ -267,6 +290,7 @@ PShape createCan(float r, float h, int detail, PImage tex) {
 }
 ```
 
+V:
 
 <a href="fig/lachoy.jpg" target="_blank"><img width="800" src="fig/lachoy.jpg"></a>
 
@@ -277,7 +301,7 @@ You should get something like this:
 
 <img width="640" src="fig/chowmein.png">
 
-
+H:
 
 ### Creating image filters
 
@@ -328,6 +352,7 @@ PShape createCan(float r, float h, int detail, PImage tex) {
 }
 ```
 
+V:
 
 Let's look at the bwfrag.glsl code:
 
@@ -350,6 +375,7 @@ void main() {
 }
 ```
 
+V:
 
 We read the texture pixel (also called as *texel*) at the position determined by the texture coordinate vertTexCoord.st:
 
@@ -373,12 +399,13 @@ If the luminance is above of below the 0.5 threshold, we output either white or 
   }   
 ```
 
+V:
 
 We should get something like:
 
 <img width="640" src="fig/bw.png">
 
-
+H:
 
 ### Convolution filters
 
@@ -386,8 +413,9 @@ We should get something like:
 
 *texOffset = vec2(1/width, 1/height)*
 
- For example, *vertTexCoord.st + vec2(texOffset.s, 0)* is the texel exactly one position to the right.
+For example, *vertTexCoord.st + vec2(texOffset.s, 0)* is the texel exactly one position to the right.
 
+V:
 
 #### Edge detection shader
 
@@ -426,9 +454,11 @@ void main() {
 }
 ```
 
+V:
 
 <img width="640" src="fig/edges.png">
 
+V:
 
 #### Emboss shader
 
@@ -462,10 +492,11 @@ void main() {
 }
 ```
 
+V:
 
 <img width="640" src="fig/emboss.png">
 
-
+H:
 
 ### Pixelation shader
 
@@ -484,9 +515,11 @@ void main() {
 }
 ```
 
+V:
 
 <img width="640" src="fig/bintex.png">
 
+V:
 
 The constant 50 can converted into an unifom variable and controlled from the sketch:
 
@@ -536,6 +569,7 @@ PShape createCan(float r, float h, int detail, PImage tex) {
 }
 ```
 
+V:
 
 ```glsl
 uniform sampler2D texture;
@@ -552,7 +586,7 @@ void main() {
 }
 ```
 
-
+H:
 
 ### Using fragment shaders as screen filters
 
@@ -583,7 +617,7 @@ void draw() {
 
 Note that the *filter()* call is done after drawing all the geometry.
 
-
+H:
 
 ### Running Shadertoy shaders in Processing
 
@@ -591,6 +625,7 @@ Shadertoy shaders are purely procedural: no geometry is sent from the main appli
 
 <a href="https://www.shadertoy.com/view/MdX3Rr" target="_blank"><img width="480" src="fig/elevated.png"></a>
 
+V:
 
 These shaders can be easily run in Processing by defining a layer between Processing and Shadertoy uniforms:
 
@@ -927,6 +962,7 @@ void main(void)
 }
 ```
 
+V:
 
 The sketch code is very simple, just the uniform setting and a rect covering the entire window to make sure that all the pixels in the screen pass through the fragment shader:
 
@@ -949,7 +985,7 @@ void draw() {
 }
 ```
 
-
+H:
 
 ## Lighting
 
@@ -957,6 +993,7 @@ Lighting a 3D scene involves placing one or more light sources in the space, and
 
 <img width="360" src="fig/lighting.png">
 
+V:
 
 We now specify both the vertex and the fragment shaders:
 
@@ -1004,6 +1041,7 @@ PShape createCan(float r, float h, int detail) {
 }
 ```
 
+V:
 
 The vertex shader handles the lighting math per each vertex:
 
@@ -1031,11 +1069,13 @@ void main() {
 }
 ```
 
+V:
 
 In the vertex shader, the ecVertex variable is the position of the input vertex expressed in eye-coordinates, since it is obtained by multiplying vertex by the modelview matrix. Similarly, multiplying the input normal vector by the normalMatrix yields its coordinates in the eye-system. 
 
 Once all the vectors are expressed in the same coordinate system, they can be used to calculate the intensity of the incident light at the current vector. From the formula used in the shader, the intensity is directly proportional to the angle between the normal and the vector between the vertex and the light source.
 
+V:
 
 And the fragment shader is simply a passthrough that receives the computer color per each pixel:
 
@@ -1047,15 +1087,17 @@ void main() {
 }
 ```
 
+V:
 
 <img width="640" src="fig/vertlight.png">
 
-
+H:
 
 ## Combining lights and textures
 
 In order to render a scene with both lights and textures, the shaders simply need to incorporate the corresponding lighting math and the texture sampling.
 
+V:
 
 Sketch code:
 
@@ -1106,6 +1148,7 @@ PShape createCan(float r, float h, int detail, PImage tex) {
 }
 ```
 
+V:
 
 Vertex shader:
 
@@ -1138,6 +1181,7 @@ void main() {
 }
 ```
 
+V:
 
 Fragment shader:
 
@@ -1152,10 +1196,11 @@ void main() {
 }
 ```
 
+V:
 
 <img width="640" src="fig/texlight.png">
 
-
+H:
 
 ### Shaderbase: creating and sharing shaders
 
@@ -1163,7 +1208,7 @@ This is a <a href="https://github.com/remixlab/shaderbase" target="_blank">proje
 
 <img width="640" src="fig/ShaderBase.png">
 
-
+H:
 
 ### THANKS!!!
 
