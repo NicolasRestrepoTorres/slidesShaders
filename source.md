@@ -27,97 +27,304 @@ H:
 
 ## Contents
 
-1. Introduction <!-- .element: class="fragment" data-fragment-index="1"-->
-2. The graphics pipeline <!-- .element: class="fragment" data-fragment-index="2" -->
-3. Fragment shaders  <!-- .element: class="fragment" data-fragment-index="3" -->
-4. Vertex lighting <!-- .element: class="fragment" data-fragment-index="4" -->
+1. Introduction
+2. Color shaders
+3. Texture shaders
+4. Light shaders
+5. Image post-processing shaders
 
 H:
 
-## Introduction
-
-### What is a shader?
+## Intro: What is a shader?
 
 <li class="fragment">A shader is a program that runs on the GPU (Graphics Processing Unit) and it is controlled by our application (for example a Processing sketch)</li>
 <li class="fragment">The language of the shaders in Processing is GLSL (OpenGL Shading Language)</li>
 
-H:
+V:
 
-### What people have done using shaders in Processing?
+## Intro: History
 
-<li class="fragment">I started my involvment with Processing back in 2007 with a couple of libraries called <a href="http://andrescolubri.net/glgraphics_gsvideo/" target="_blank">GLGraphics and GSVideo</a></li>
+<li class="fragment">Andres started his involvement with Processing back in 2007 with a couple of libraries called <a href="http://andrescolubri.net/glgraphics_gsvideo/" target="_blank">GLGraphics and GSVideo</a></li>
 <li class="fragment">In 2013, <a href="http://andrescolubri.net/processing-2/" target="_blank">Processing 2.0</a> was released and incorporated most of the funcionality of GLGraphics and GSVideo, including shaders, into the core of the language</li>
 
-H:
+V:
 
+## Intro: Sample projects
 ### Generating Utopia, by Stefan Wagner
 
 <iframe src="//player.vimeo.com/video/74066023" width="854" height="510" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 
-H:
+V:
 
+## Intro: Sample projects
 ### Video portraits, by Sergio Albiac
 
 <iframe src="//player.vimeo.com/video/32760578" width="854" height="510" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 
-H:
+V:
 
+## Intro: Sample projects
 ### Generative Typography, by Amnon Owed
 
 <iframe src="https://player.vimeo.com/video/101383026" width="854" height="478" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 
-H:
+V:
 
+## Intro: Sample projects
 ### Unnamed soundsculpture, by Daniel Franke
 
 <iframe src="//player.vimeo.com/video/38840688" width="854" height="510" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 
-H:
+V:
 
+## Intro: Sample projects
 ### Just Cause 2 visualization, by Jim Blackhurst
 
 <iframe width="854" height="510" src="//www.youtube.com/embed/hEoxaGkNcrg" frameborder="0" allowfullscreen></iframe>
 
-H:
+V:
 
+## Intro: Sample projects
 ### Latent State, thesis project
 
 <iframe src="//player.vimeo.com/video/4806038" width="854" height="469" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 
-H:
+V:
 
-### Shaders with WebGL
+## Intro: The graphics pipeline
 
-<a href="https://www.shadertoy.com/" target="_blank"><img width="800" src="fig/shadertoy.png"></a>
+<div class="ulist">
+    <img src="fig/pipeline.png" alt="pipeline" width="55%" style="float: right">
+    <ul style="width: 30%;">
+        <p class="fragment" data-fragment-index="1">Vertex shader</p>
+        <p class="fragment" data-fragment-index="2">Fragment shader</p>
+    </ul>
+</div>
 
+V:
 
-<a href="http://glslsandbox.com/" target="_blank"><img width="800" src="fig/glslsandbox.png"></a>
+## Intro: Shaders GPU execution
 
-H:
+The vertex shader is run on *each vertex* sent from the sketch:
 
-### Hello, World!
+```python
+for vertex in geometry:
+    vertex_shader(vertex)
+```
 
-<img width="600" src="fig/Processing.png">
+The fragment shader is run on *each pixel* covered by the geometry in our sketch:
 
-H:
+```python
+for pixel in screen:
+    if covered_by_geometry(pixel):
+        ouptut_color = fragment_shader(pixel)
+```
 
-### The graphics pipeline
+V:
 
-<img width="800" src="fig/Processing-pipeline.png">
+## Intro: Shader variable types
 
-H:
+<li class="fragment">Uniform variables are those that remain constant for each vertex in the scene, for example the _projection_ and _modelview_ matrices</li>
+<li class="fragment">Attribute variables are defined per each vertex, for example the _position_, _normal_, and _color_</li>
+<li class="fragment">The varying variables connect the different pipeline stages</li>
 
-### The stages of the pipeline
+V:
 
-<a href="fig/GPU-pipeline.png" target="_blank"><img height="600" src="fig/GPU-pipeline.png"></a>
+## Intro: Shader example
 
-H:
+[Proscene picking buffer fragment shader](https://github.com/remixlab/proscene/blob/master/data/PickingBuffer.frag)
 
-### Type of variables in a shader
+```glsl
+uniform vec3 id;
 
-<li class="fragment">Uniform variables are those that remain constant for each vertex in the scene, for example the projection and modelview matrices</li>
-<li class="fragment">Attribute variables are defined per each vertex, for example the position, normal, and color</li>
-<li class="fragment">The varying variables connect the different stages in the shader</li>
+void main() {
+  gl_FragColor = vec4(id, 1.0);
+}
+```
+
+V:
+
+## Intro: Shader example
+
+[Proscene picking buffer fragment shader](https://github.com/remixlab/proscene/blob/master/data/PickingBuffer.frag)
+
+<img height='400' src='fig/pickingbuffer.png'/>
+
+V:
+
+## Intro: Processing shader API: [PShader](https://processing.org/reference/PShader.html)
+
+> Class that encapsulates a GLSL shader program, including a vertex and a fragment shader
+
+V:
+
+## Intro: Processing shader API: [loadShader()](https://processing.org/reference/loadShader_.html)
+
+> Loads a shader into the PShader object
+
+Method signatures
+
+```processing
+  loadShader(fragFilename)
+  loadShader(fragFilename, vertFilename)
+```
+<!-- .element: class="fragment" data-fragment-index="1"-->
+
+Example
+
+```processing
+  PShader unalShader;
+  void setup() {
+    ...
+    //when no path is specified it looks in the sketch 'data' folder
+    unalShader = loadShader("unal_frag.glsl", "unal_vert.glsl");
+  }
+```
+<!-- .element: class="fragment" data-fragment-index="2"-->
+
+V:
+
+## Intro: Processing shader API: [shader()](https://processing.org/reference/shader_.html)
+
+> Applies the specified shader
+
+Method signature
+
+```processing
+  shader(shader)
+```
+<!-- .element: class="fragment" data-fragment-index="1"-->
+
+Example
+
+```processing
+  PShader simpleShader, unalShader;
+  void draw() {
+    ...
+    shader(simpleShader);
+    simpleGeometry();
+    shader(unalShader);
+    unalGeometry();
+  }
+```
+<!-- .element: class="fragment" data-fragment-index="2"-->
+
+V:
+
+## Intro: Processing shader API: [resetShader()](https://processing.org/reference/resetShader_.html)
+
+> Restores the default shaders
+
+Method signatures
+
+```processing
+  resetShader()
+```
+<!-- .element: class="fragment" data-fragment-index="1"-->
+
+Example
+
+```processing
+  PShader simpleShader;
+  void draw() {
+    ...
+    shader(simpleShader);
+    simpleGeometry();
+    resetshader();
+    otherGeometry();
+  }
+```
+<!-- .element: class="fragment" data-fragment-index="2"-->
+
+V:
+
+## Intro: Processing shader API: [PShader.set()](https://processing.org/reference/PShader_set_.html)
+
+> Sets the uniform variables inside the shader to modify the effect while the program is running
+
+Method signatures for vector uniform variables `vec2`, `vec3` or `vec4`:
+
+```processing
+  .set(name, x)
+  .set(name, x, y)
+  .set(name, x, y, z)
+  .set(name, x, y, z, w)
+  .set(name, vec)
+```
+
+* *name*: of the uniform variable to modify
+* *x*, *y*, *z* and *w*: 1st, snd, 3rd and 4rd vec float components resp.
+* *vec*: PVector
+
+V:
+
+## Intro: Processing shader API: [PShader.set()](https://processing.org/reference/PShader_set_.html)
+
+> Sets the uniform variables inside the shader to modify the effect while the program is running
+
+Method signatures for vector uniform variables `boolean[]`, `float[]`, `int[]`:
+
+```processing
+  .set(name, x)
+  .set(name, x, y)
+  .set(name, x, y, z)
+  .set(name, x, y, z, w)
+  .set(name, vec)
+```
+
+* *name*: of the uniform variable to modify
+* *x*, *y*, *z* and *w*: 1st, snd, 3rd and 4rd vec (boolean, float or int) components resp.
+* *vec*: boolean[], float[], int[]
+
+V:
+
+## Intro: Processing shader API: [PShader.set()](https://processing.org/reference/PShader_set_.html)
+
+> Sets the uniform variables inside the shader to modify the effect while the program is running
+
+Method signatures for `mat3` and `mat4` uniform variables:
+
+```processing
+  .set(name, mat) // mat is PMatrix2D, or PMatrix3D
+```
+
+* *name* of the uniform variable to modify
+* *mat* PMatrix3D, or PMatrix2D
+
+V:
+
+## Intro: Shaders
+### Processing shader API: [PShader.set()](https://processing.org/reference/PShader_set_.html)
+
+> Sets the uniform variables inside the shader to modify the effect while the program is running
+
+Method signatures for vector uniform variables:
+
+```processing
+  .set(name, tex) // tex is a PImage
+```
+
+V:
+
+## Intro: Processing shader API: [PShader.set()](https://processing.org/reference/PShader_set_.html)
+
+> Sets the uniform variables inside the shader to modify the effect while the program is running
+
+Example:
+
+```processing
+  PShader unalShader;
+  PMatrix3D projectionModelView1, projectionModelView2;
+  void draw() {
+    ...
+    shader(unalShader);
+    unalShader.set("unalMatrix", projectionModelView1);
+    unalGeometry1();
+    unalShader.set("unalMatrix", projectionModelView2);
+    unalGeometry2();
+  }
+```
+<!-- .element: class="fragment" data-fragment-index="1"-->
 
 H:
 
@@ -127,7 +334,6 @@ I will be following the <a href="https://processing.org/tutorials/pshader/" targ
 
 The code for the tutorial in available on <a href="https://github.com/codeanticode/pshader-tutorials" target="_blank">this github repository</a>
 
-The latest vesion of the shader API in Processing is described in <a href="http://codeanticode.wordpress.com/2014/05/08/shader_api_in_processing_2/" target="_blank">this blogpost</a>
 
 H:
 
@@ -1213,3 +1419,14 @@ H:
 ### THANKS!!!
 
 <img width="640" src="fig/all-your-base.jpg">
+
+
+H:
+
+## References
+
+* [The Book of Shaders, by Patricio Gonzalez Vivo](http://patriciogonzalezvivo.com/2015/thebookofshaders/)
+* [Processing shaders tutorial](https://www.processing.org/tutorials/pshader/)
+* [Tutorial source code](https://github.com/codeanticode/pshader-tutorials)
+* [Shader Programming for Computational Arts and Design - A Comparison between Creative Coding Frameworks](http://www.scitepress.org/DigitalLibrary/PublicationsDetail.aspx?ID=ysaclbloDHk=&t=1)
+* [ShaderBase: A Processing Tool for Shaders in Computational Arts and Design](http://www.scitepress.org/DigitalLibrary/Link.aspx?doi=10.5220/0005673201890194) (source code [available here](https://github.com/remixlab/shaderbase))
