@@ -28,14 +28,25 @@ H:
 ## Contents
 
 1. Introduction
+<!-- .element: class="fragment" data-fragment-index="1"-->
 2. Shader design patterns
+<!-- .element: class="fragment" data-fragment-index="1"-->
 3. The chow mein can
 <!-- .element: class="fragment" data-fragment-index="1"-->
 4. Color shaders
+<!-- .element: class="fragment" data-fragment-index="2"-->
 5. Texture shaders
+<!-- .element: class="fragment" data-fragment-index="2"-->
 6. Light shaders
+<!-- .element: class="fragment" data-fragment-index="2"-->
 7. Image post-processing shaders
 <!-- .element: class="fragment" data-fragment-index="2"-->
+8. Screen filters
+<!-- .element: class="fragment" data-fragment-index="3"-->
+9. Shadertoy
+<!-- .element: class="fragment" data-fragment-index="3"-->
+10. Shaderbase
+<!-- .element: class="fragment" data-fragment-index="3"-->
 
 H:
 
@@ -619,7 +630,7 @@ V:
 
 ## Texture shaders
 ### Pixelation effect
-#### Pixelator.pde code
+#### [Pixelator.pde](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/Pixelator/Pixelator.pde) code
 
 The constant 50 can be converted into an *uniform* variable (```binsize```) to be controlled from the sketch:
 
@@ -673,7 +684,7 @@ V:
 
 ## Texture shaders
 ### Pixelation effect
-#### pixel.glsl code
+#### [pixel.glsl](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/Pixelator/data/pixel.glsl) code
 
 ```glsl
 uniform sampler2D texture;
@@ -893,12 +904,228 @@ V:
 
 H:
 
-### Using fragment shaders as screen filters
+## Lighting
 
-We saw how we can create various effects by altering the way texels are read and manipulated in the fragment shader. Since the entire image on the screen it is actually an image, we apply any of the effects we saw until now to apply on an arbitrary Processing sketch using the *filter()* function and passing a PShader argument to it.
+Lighting a 3D scene involves placing one or more light sources in the space, and defining their parameters, such as type (point, spotlight) and color (diffuse, ambient, specular). In the simplest model of lighting, the intensity at each vertex is computed as the dot product between the vertex normal and the direction vector between the vertex and light positions. This model represents a point light source that emits light equally in all directions: 
 
+<img width="360" src="fig/lighting.png">
 
-For example, we can to apply the emboss filter:
+V:
+
+We now specify both the vertex and the fragment shaders:
+
+```java
+PShape can;
+float angle;
+
+PShader lightShader;
+
+void setup() {
+  size(640, 360, P3D);
+  can = createCan(100, 200, 32);
+  lightShader = loadShader("lightfrag.glsl", "lightvert.glsl");
+}
+
+void draw() {    
+  background(0);
+
+  shader(lightShader);
+
+  pointLight(255, 255, 255, width/2, height, 200);
+
+  translate(width/2, height/2);
+  rotateY(angle);  
+  shape(can);  
+  angle += 0.01;
+}
+
+PShape createCan(float r, float h, int detail) {
+  textureMode(NORMAL);
+  PShape sh = createShape();
+  sh.beginShape(QUAD_STRIP);
+  sh.noStroke();
+  for (int i = 0; i <= detail; i++) {
+    float angle = TWO_PI / detail;
+    float x = sin(i * angle);
+    float z = cos(i * angle);
+    float u = float(i) / detail;
+    sh.normal(x, 0, z);
+    sh.vertex(x * r, -h/2, z * r, u, 0);
+    sh.vertex(x * r, +h/2, z * r, u, 1);    
+  }
+  sh.endShape(); 
+  return sh;
+}
+```
+
+V:
+
+The vertex shader handles the lighting math per each vertex:
+
+```glsl
+uniform mat4 modelviewMatrix;
+uniform mat4 transformMatrix;
+uniform mat3 normalMatrix;
+
+uniform vec4 lightPosition;
+
+attribute vec4 position;
+attribute vec4 color;
+attribute vec3 normal;
+
+varying vec4 vertColor;
+
+void main() {
+  gl_Position = transformMatrix * position;    
+  vec3 ecVertex = vec3(modelviewMatrix * position);  
+  vec3 ecNormal = normalize(normalMatrix * normal);
+
+  vec3 direction = normalize(lightPosition.xyz - ecVertex);    
+  float intensity = max(0.0, dot(direction, ecNormal));
+  vertColor = vec4(intensity, intensity, intensity, 1) * color;             
+}
+```
+
+V:
+
+In the vertex shader, the ecVertex variable is the position of the input vertex expressed in eye-coordinates, since it is obtained by multiplying vertex by the modelview matrix. Similarly, multiplying the input normal vector by the normalMatrix yields its coordinates in the eye-system. 
+
+Once all the vectors are expressed in the same coordinate system, they can be used to calculate the intensity of the incident light at the current vector. From the formula used in the shader, the intensity is directly proportional to the angle between the normal and the vector between the vertex and the light source.
+
+V:
+
+And the fragment shader is simply a passthrough that receives the computer color per each pixel:
+
+```glsl
+varying vec4 vertColor;
+
+void main() {
+  gl_FragColor = vertColor;
+}
+```
+
+V:
+
+<img width="640" src="fig/vertlight.png">
+
+H:
+
+## Combining lights and textures
+
+In order to render a scene with both lights and textures, the shaders simply need to incorporate the corresponding lighting math and the texture sampling.
+
+V:
+
+Sketch code:
+
+```java
+PImage label;
+PShape can;
+float angle;
+
+PShader texlightShader;
+
+void setup() {
+  size(640, 360, P3D);  
+  label = loadImage("lachoy.jpg");
+  can = createCan(100, 200, 32, label);
+  texlightShader = loadShader("texlightfrag.glsl", "texlightvert.glsl");
+}
+
+void draw() {    
+  background(0);
+  
+  shader(texlightShader);
+
+  pointLight(255, 255, 255, width/2, height, 200);  
+    
+  translate(width/2, height/2);
+  rotateY(angle);  
+  shape(can);  
+  angle += 0.01;
+}
+
+PShape createCan(float r, float h, int detail, PImage tex) {
+  textureMode(NORMAL);
+  PShape sh = createShape();
+  sh.beginShape(QUAD_STRIP);
+  sh.noStroke();
+  sh.texture(tex);
+  for (int i = 0; i <= detail; i++) {
+    float angle = TWO_PI / detail;
+    float x = sin(i * angle);
+    float z = cos(i * angle);
+    float u = float(i) / detail;
+    sh.normal(x, 0, z);
+    sh.vertex(x * r, -h/2, z * r, u, 0);
+    sh.vertex(x * r, +h/2, z * r, u, 1);    
+  }
+  sh.endShape(); 
+  return sh;
+}
+```
+
+V:
+
+Vertex shader:
+
+```glsl
+uniform mat4 modelviewMatrix;
+uniform mat4 transformMatrix;
+uniform mat3 normalMatrix;
+uniform mat4 texMatrix;
+
+uniform vec4 lightPosition;
+
+attribute vec4 position;
+attribute vec4 color;
+attribute vec3 normal;
+attribute vec2 texCoord;
+
+varying vec4 vertColor;
+varying vec4 vertTexCoord;
+
+void main() {
+  gl_Position = transformMatrix * position;    
+  vec3 ecVertex = vec3(modelviewMatrix * position);  
+  vec3 ecNormal = normalize(normalMatrix * normal);
+
+  vec3 direction = normalize(lightPosition.xyz - ecVertex);    
+  float intensity = max(0.0, dot(direction, ecNormal));
+  vertColor = vec4(intensity, intensity, intensity, 1) * color;     
+  
+  vertTexCoord = texMatrix * vec4(texCoord, 1.0, 1.0);        
+}
+```
+
+V:
+
+Fragment shader:
+
+```glsl
+uniform sampler2D texture;
+
+varying vec4 vertColor;
+varying vec4 vertTexCoord;
+
+void main() {
+  gl_FragColor = texture2D(texture, vertTexCoord.st) * vertColor;
+}
+```
+
+V:
+
+<img width="640" src="fig/texlight.png">
+
+H:
+
+## Screen filters
+### Using fragment shaders
+
+We can also apply any of the image post-processing effects to an arbitrary
+Processing sketch using the ```filter()``` function and passing a PShader argument to it
+
+For example, to apply the [emboss shader as a screen filter](https://github.com/VisualComputing/Shaders/tree/gh-pages/sketches/desktop/ScreenFilter):
 
 ```java
 PShader emboss;
@@ -920,17 +1147,21 @@ void draw() {
 }
 ```
 
-Note that the *filter()* call is done after drawing all the geometry.
+Note that the ```filter()``` call is done after drawing all the geometry
 
 H:
 
-### Running Shadertoy shaders in Processing
+## Shadertoy
 
-Shadertoy shaders are purely procedural: no geometry is sent from the main application, and all the scene is generated in the fragment shader:
+[Shadertoy shaders](https://www.shadertoy.com/) are purely procedural: no geometry is sent from the main application,
+and all the scene is generated in the fragment shader:
 
 <a href="https://www.shadertoy.com/view/MdX3Rr" target="_blank"><img width="480" src="fig/elevated.png"></a>
 
 V:
+
+## Shadertoy
+### Running Shadertoy shaders in Processing
 
 These shaders can be easily run in Processing by defining a layer between Processing and Shadertoy uniforms:
 
@@ -1269,6 +1500,9 @@ void main(void)
 
 V:
 
+## Shadertoy
+### Running Shadertoy shaders in Processing
+
 The sketch code is very simple, just the uniform setting and a rect covering the entire window to make sure that all the pixels in the screen pass through the fragment shader:
 
 ```java
@@ -1292,233 +1526,13 @@ void draw() {
 
 H:
 
-## Lighting
+## Shaderbase
+### Creating and sharing shaders
 
-Lighting a 3D scene involves placing one or more light sources in the space, and defining their parameters, such as type (point, spotlight) and color (diffuse, ambient, specular). In the simplest model of lighting, the intensity at each vertex is computed as the dot product between the vertex normal and the direction vector between the vertex and light positions. This model represents a point light source that emits light equally in all directions: 
-
-<img width="360" src="fig/lighting.png">
-
-V:
-
-We now specify both the vertex and the fragment shaders:
-
-```java
-PShape can;
-float angle;
-
-PShader lightShader;
-
-void setup() {
-  size(640, 360, P3D);
-  can = createCan(100, 200, 32);
-  lightShader = loadShader("lightfrag.glsl", "lightvert.glsl");
-}
-
-void draw() {    
-  background(0);
-
-  shader(lightShader);
-
-  pointLight(255, 255, 255, width/2, height, 200);
-
-  translate(width/2, height/2);
-  rotateY(angle);  
-  shape(can);  
-  angle += 0.01;
-}
-
-PShape createCan(float r, float h, int detail) {
-  textureMode(NORMAL);
-  PShape sh = createShape();
-  sh.beginShape(QUAD_STRIP);
-  sh.noStroke();
-  for (int i = 0; i <= detail; i++) {
-    float angle = TWO_PI / detail;
-    float x = sin(i * angle);
-    float z = cos(i * angle);
-    float u = float(i) / detail;
-    sh.normal(x, 0, z);
-    sh.vertex(x * r, -h/2, z * r, u, 0);
-    sh.vertex(x * r, +h/2, z * r, u, 1);    
-  }
-  sh.endShape(); 
-  return sh;
-}
-```
-
-V:
-
-The vertex shader handles the lighting math per each vertex:
-
-```glsl
-uniform mat4 modelviewMatrix;
-uniform mat4 transformMatrix;
-uniform mat3 normalMatrix;
-
-uniform vec4 lightPosition;
-
-attribute vec4 position;
-attribute vec4 color;
-attribute vec3 normal;
-
-varying vec4 vertColor;
-
-void main() {
-  gl_Position = transformMatrix * position;    
-  vec3 ecVertex = vec3(modelviewMatrix * position);  
-  vec3 ecNormal = normalize(normalMatrix * normal);
-
-  vec3 direction = normalize(lightPosition.xyz - ecVertex);    
-  float intensity = max(0.0, dot(direction, ecNormal));
-  vertColor = vec4(intensity, intensity, intensity, 1) * color;             
-}
-```
-
-V:
-
-In the vertex shader, the ecVertex variable is the position of the input vertex expressed in eye-coordinates, since it is obtained by multiplying vertex by the modelview matrix. Similarly, multiplying the input normal vector by the normalMatrix yields its coordinates in the eye-system. 
-
-Once all the vectors are expressed in the same coordinate system, they can be used to calculate the intensity of the incident light at the current vector. From the formula used in the shader, the intensity is directly proportional to the angle between the normal and the vector between the vertex and the light source.
-
-V:
-
-And the fragment shader is simply a passthrough that receives the computer color per each pixel:
-
-```glsl
-varying vec4 vertColor;
-
-void main() {
-  gl_FragColor = vertColor;
-}
-```
-
-V:
-
-<img width="640" src="fig/vertlight.png">
-
-H:
-
-## Combining lights and textures
-
-In order to render a scene with both lights and textures, the shaders simply need to incorporate the corresponding lighting math and the texture sampling.
-
-V:
-
-Sketch code:
-
-```java
-PImage label;
-PShape can;
-float angle;
-
-PShader texlightShader;
-
-void setup() {
-  size(640, 360, P3D);  
-  label = loadImage("lachoy.jpg");
-  can = createCan(100, 200, 32, label);
-  texlightShader = loadShader("texlightfrag.glsl", "texlightvert.glsl");
-}
-
-void draw() {    
-  background(0);
-  
-  shader(texlightShader);
-
-  pointLight(255, 255, 255, width/2, height, 200);  
-    
-  translate(width/2, height/2);
-  rotateY(angle);  
-  shape(can);  
-  angle += 0.01;
-}
-
-PShape createCan(float r, float h, int detail, PImage tex) {
-  textureMode(NORMAL);
-  PShape sh = createShape();
-  sh.beginShape(QUAD_STRIP);
-  sh.noStroke();
-  sh.texture(tex);
-  for (int i = 0; i <= detail; i++) {
-    float angle = TWO_PI / detail;
-    float x = sin(i * angle);
-    float z = cos(i * angle);
-    float u = float(i) / detail;
-    sh.normal(x, 0, z);
-    sh.vertex(x * r, -h/2, z * r, u, 0);
-    sh.vertex(x * r, +h/2, z * r, u, 1);    
-  }
-  sh.endShape(); 
-  return sh;
-}
-```
-
-V:
-
-Vertex shader:
-
-```glsl
-uniform mat4 modelviewMatrix;
-uniform mat4 transformMatrix;
-uniform mat3 normalMatrix;
-uniform mat4 texMatrix;
-
-uniform vec4 lightPosition;
-
-attribute vec4 position;
-attribute vec4 color;
-attribute vec3 normal;
-attribute vec2 texCoord;
-
-varying vec4 vertColor;
-varying vec4 vertTexCoord;
-
-void main() {
-  gl_Position = transformMatrix * position;    
-  vec3 ecVertex = vec3(modelviewMatrix * position);  
-  vec3 ecNormal = normalize(normalMatrix * normal);
-
-  vec3 direction = normalize(lightPosition.xyz - ecVertex);    
-  float intensity = max(0.0, dot(direction, ecNormal));
-  vertColor = vec4(intensity, intensity, intensity, 1) * color;     
-  
-  vertTexCoord = texMatrix * vec4(texCoord, 1.0, 1.0);        
-}
-```
-
-V:
-
-Fragment shader:
-
-```glsl
-uniform sampler2D texture;
-
-varying vec4 vertColor;
-varying vec4 vertTexCoord;
-
-void main() {
-  gl_FragColor = texture2D(texture, vertTexCoord.st) * vertColor;
-}
-```
-
-V:
-
-<img width="640" src="fig/texlight.png">
-
-H:
-
-### Shaderbase: creating and sharing shaders
-
-This is a <a href="https://github.com/remixlab/shaderbase" target="_blank">project</a> in collaboration with Jean Pierre Charalambos at the National University of Colombia. The goal is to create a Processing tool that allows users to upload shaders to a online database hosted on github.
+<li class="fragment"> This is an on-going [collaboration](https://github.com/remixlab/shaderbase)
+<li class="fragment"> The goal is to create a Processing tool that allows users to upload shaders to a github-based db
 
 <img width="640" src="fig/ShaderBase.png">
-
-H:
-
-### THANKS!!!
-
-<img width="640" src="fig/all-your-base.jpg">
-
 
 H:
 
