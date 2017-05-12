@@ -28,10 +28,14 @@ H:
 ## Contents
 
 1. Introduction
-2. Color shaders
-3. Texture shaders
-4. Light shaders
-5. Image post-processing shaders
+2. Shader design patterns
+3. The chow mein can
+<!-- .element: class="fragment" data-fragment-index="1"-->
+4. Color shaders
+5. Texture shaders
+6. Light shaders
+7. Image post-processing shaders
+<!-- .element: class="fragment" data-fragment-index="2"-->
 
 H:
 
@@ -134,13 +138,7 @@ V:
 
 [Proscene picking buffer fragment shader](https://github.com/remixlab/proscene/blob/master/data/PickingBuffer.frag)
 
-```glsl
-uniform vec3 id;
-
-void main() {
-  gl_FragColor = vec4(id, 1.0);
-}
-```
+<img height='400' src='fig/pickingbuffer.png'/>
 
 V:
 
@@ -148,7 +146,13 @@ V:
 
 [Proscene picking buffer fragment shader](https://github.com/remixlab/proscene/blob/master/data/PickingBuffer.frag)
 
-<img height='400' src='fig/pickingbuffer.png'/>
+```glsl
+uniform vec3 id;
+
+void main() {
+  gl_FragColor = vec4(id, 1.0);
+}
+```
 
 V:
 
@@ -328,134 +332,75 @@ Example:
 
 H:
 
-### Shader code
+## Shader design patterns
 
-I will be following the <a href="https://processing.org/tutorials/pshader/" target="_blank">PShader tutorial in the Processing site</a>
-
-The code for the tutorial in available on <a href="https://github.com/codeanticode/pshader-tutorials" target="_blank">this github repository</a>
-
-
-H:
-
-### The Book of Shaders, by Patricio Gonzalez Vivo
-
-<a href="http://patriciogonzalezvivo.com/2015/thebookofshaders/" target="_blank"><img height="600" src="fig/TheBookOfShaders.png"></a>
-
-
-<a href="fig/TheBookOfShaders2.png" target="_blank"><img height="600" src="fig/TheBookOfShaders2.png"></a>
-
-H:
-
-### Example 2.1: Toon shader
-
-<a href="fig/toonshader.png" target="_blank"><img width="800" src="fig/toonshader.png"></a>
-
-
-Let's examine the sketch code. Notice the PShader object:
-
-```java
-PShader toon;
-
-void setup() {
-  size(360, 360, P3D);
-  noStroke();
-  fill(204);
-  toon = loadShader("frag.glsl", "vert.glsl");
-  toon.set("fraction", 1.0);
-}
-
-void draw() {
-  shader(toon);
-  background(0); 
-  float dirY = (mouseY / float(height) - 0.5) * 2;
-  float dirX = (mouseX / float(width) - 0.5) * 2;
-  directionalLight(204, 204, 204, -dirX, -dirY, -1);
-  translate(width/2, height/2);
-  sphere(120);
-}
-```
+1. Data sent from the sketch to the shaders<!-- .element: class="fragment" data-fragment-index="1"-->
+2. Passing data among shaders<!-- .element: class="fragment" data-fragment-index="2"-->
+3. Consistency of geometry operations<!-- .element: class="fragment" data-fragment-index="3"-->
 
 V:
 
-The vertex shader:
+## Shader design patterns
+### Rule 1: Data sent from the sketch to the shaders
 
-```glsl
-uniform mat4 transformMatrix;
-uniform mat3 normalMatrix;
-uniform vec3 lightNormal;
+> Processing passes data to the shaders in a context sensitive way
 
-attribute vec4 vertex;
-attribute vec4 color;
-attribute vec3 normal;
-
-varying vec4 vertColor;
-varying vec3 vertNormal;
-varying vec3 vertLightDir;
-
-void main() {
-  gl_Position = transformMatrix * vertex;  
-  vertColor = color;
-  vertNormal = normalize(normalMatrix * normal);
-  vertLightDir = -lightNormal;
-}
-```
-
-which ones are the uniforms and the attribute variables?
+<li class="fragment">Specific data (attribute and uniform vatiables) sent to the GPU depends on the type of shader
+<li class="fragment">Data to be sent to the GPU depends on issued Processing commands, e.g., the ```attribute vec4 color``` vertex shader attribute is related to the ```fill(rgb)``` Processing command
 
 V:
 
-The fragment shader:
+## Shader design patterns
+### Rule 1: Data sent from the sketch to the shaders
+#### Shader types
 
-```glsl
-uniform float fraction;
+| Primitive type | Shader type |   Pre-processor #defines   |
+|----------------|:-----------:|:--------------------------:|
+| Point          | POINT       | PROCESSING_POINT_SHADER    |
+| Line           | LINE        | PROCESSING_LINE_SHADER     |
+| Triangle       | COLOR       | PROCESSING_COLOR_SHADER    |
+| Triangle       | LIGHT       | PROCESSING_LIGHT_SHADER    |
+| Triangle       | TEXTURE     | PROCESSING_TEXTURE_SHADER  |
+| Triangle       | TEXLIGHT    | PROCESSING_TEXLIGHT_SHADER |
 
-varying vec4 vertColor;
-varying vec3 vertNormal;
-varying vec3 vertLightDir;
+N:
 
-void main() {  
-  float intensity;
-  vec4 color;
-  intensity = max(0.0, dot(vertLightDir, vertNormal));
+* Processing shader type auto-detection utility
 
-  if (intensity > pow(0.95, fraction)) {
-    color = vec4(vec3(1.0), 1.0);
-  } else if (intensity > pow(0.5, fraction)) {
-    color = vec4(vec3(0.6), 1.0);
-  } else if (intensity > pow(0.25, fraction)) {
-    color = vec4(vec3(0.4), 1.0);
-  } else {
-    color = vec4(vec3(0.2), 1.0);
-  }
+V:
 
-  gl_FragColor = color * vertColor;  
-}
-```
+## Shader design patterns
+### Rule 2: Passing data among shaders
 
-H:
+> Uniform variables are available for both, the vertex and the fragment shader. Attribute variables are only available to the vertex shader
 
-### How are the shaders executed by the GPU?
+<li class="fragment"> Passing a vertex *attribute* variable to the fragment shader requires relating it first to a vertex shader *varying* variable
 
-The vertex shader is run on *each vertex* sent from the sketch:
+V:
 
-```python
-for vertex in geometry:
-    vertex_shader(vertex)
-```
+## Shader design patterns
+### Rule 3: Consistency of geometry operations
 
-The fragment shader is run on *each pixel* covered by the geometry in our sketch:
+> Geometry operations should always be carried out under the same reference frame
 
-```python
-for pixel in screen:
-    if covered_by_geometry(pixel):
-        ouptut_color = fragment_shader(pixel)
-```
+<li class="fragment"> Tip 1: ```transform * vertex // projection * modelview * vertex``` yields the vertex coordinates in [clip-space](http://www.songho.ca/opengl/gl_transform.html)
+<li class="fragment"> Tip 2: ```modelview * vertex``` yields the vertex coordinates in eye-space
+<li class="fragment"> Tip 3: Since the eye position is 0 in eye-space, the eye-space is the usual reference frame for geometry operarions 
 
 H:
 
-### The chow mein can 
+## The chow mein can
 
-During rest of the class we will work with the following test geometry:
+During the rest of this presentation we will work with the following test scene:
+
+<img width="640" src="fig/chowmein.png">
+
+<li class="fragment"> We will be following the [Processing shader tutorial](https://processing.org/tutorials/pshader/) which source code is available [here](https://github.com/codeanticode/pshader-tutorials)
+
+V:
+
+## The chow mein can
+### Code 
 
 ```java
 PImage label;
@@ -498,14 +443,59 @@ PShape createCan(float r, float h, int detail, PImage tex) {
 
 V:
 
+## The chow mein can
+### Texture
+
 <a href="fig/lachoy.jpg" target="_blank"><img width="800" src="fig/lachoy.jpg"></a>
 
 (from Jason Liebig's <a href="http://www.flickr.com/photos/jasonliebigstuff/3739263136/in/photostream/" target="_blank">FLICKR collection</a> of vintage labels and wrappers)
 
+H:
 
-You should get something like this:
+## Color shaders
 
-<img width="640" src="fig/chowmein.png">
+<figure>
+    <img height="400" src="fig/color.png">
+    <figcaption>Color shader output (source code available [here](https://github.com/codeanticode/pshader-tutorials/tree/master/intro/Ex_04_2_color))</figcaption>
+</figure>
+
+V:
+
+## Color shaders: Design patterns
+
+Rule 1: Data sent from the sketch to the shaders
+
+([colorvert.glsl](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_04_2_color/data/colorvert.glsl) exerpt)
+```glsl
+...
+attribute vec4 color;
+```
+
+V:
+
+## Color shaders: Design patterns
+
+Rule 2: Passing data among shaders
+
+([colorvert.glsl](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_04_2_color/data/colorvert.glsl) exerpt)
+```glsl
+attribute vec4 color;
+varying vec4 vertColor;
+void main() {
+  ...
+  vertColor = color;
+}
+```
+<!-- .element: class="fragment" data-fragment-index="1"-->
+
+([colorfrag.glsl](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_04_2_color/data/colorfrag.glsl) exerpt)
+```glsl
+varying vec4 vertColor;
+void main() {
+  gl_FragColor = vertColor;
+}
+```
+<!-- .element: class="fragment" data-fragment-index="2"-->
 
 H:
 
