@@ -128,9 +128,13 @@ V:
 
 ## Intro: Shader variable types
 
-<li class="fragment">Uniform variables are those that remain constant for each vertex in the scene, for example the _projection_ and _modelview_ matrices</li>
-<li class="fragment">Attribute variables are defined per each vertex, for example the _position_, _normal_, and _color_</li>
-<li class="fragment">The varying variables connect the different pipeline stages</li>
+<li class="fragment">*Uniform* variables are those that remain constant for each vertex in the scene, for example the _projection_ and _modelview_ matrices</li>
+<li class="fragment">*Attribute* variables are defined per each vertex, for example the _position_, _normal_, and _color_</li>
+<li class="fragment">*Varying* variables allows to relate a vertex attribute to a fragment, using interpolation</li>
+
+N:
+
+* varying variables get interpolated between the vertex and the fragment shader
 
 V:
 
@@ -374,7 +378,21 @@ V:
 
 > Uniform variables are available for both, the vertex and the fragment shader. Attribute variables are only available to the vertex shader
 
-<li class="fragment"> Passing a vertex *attribute* variable to the fragment shader requires relating it first to a vertex shader *varying* variable
+<li class="fragment"> Passing a vertex *attribute* variable to the fragment shader thus requires relating it first to a vertex shader *varying* variable
+<li class="fragment"> The vertex and fragment shaders would look like the following:
+  ```glsl
+  // vert.glsl
+  attribute <type> var;
+  varying <type> vert_var;
+  void main() {
+    ...
+    vert_var = fx(var);
+  }
+  ```
+  ```glsl
+  // frag.glsl
+  varying <type> vert_var;
+  ```
 
 V:
 
@@ -385,7 +403,7 @@ V:
 
 <li class="fragment"> Tip 1: ```transform * vertex // projection * modelview * vertex``` yields the vertex coordinates in [clip-space](http://www.songho.ca/opengl/gl_transform.html)
 <li class="fragment"> Tip 2: ```modelview * vertex``` yields the vertex coordinates in eye-space
-<li class="fragment"> Tip 3: Since the eye position is 0 in eye-space, the eye-space is the usual reference frame for geometry operarions 
+<li class="fragment"> Tip 3: Since the eye position is 0 in eye-space, eye-space is the usual reference frame for geometry operations 
 
 H:
 
@@ -463,9 +481,9 @@ V:
 
 ## Color shaders: Design patterns
 
-Rule 1: Data sent from the sketch to the shaders
+> Rule 1: Data sent from the sketch to the shaders
 
-([colorvert.glsl](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_04_2_color/data/colorvert.glsl) exerpt)
+([colorvert.glsl](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_04_2_color/data/colorvert.glsl) excerpt)
 ```glsl
 ...
 attribute vec4 color;
@@ -475,9 +493,9 @@ V:
 
 ## Color shaders: Design patterns
 
-Rule 2: Passing data among shaders
+> Rule 2: Passing data among shaders
 
-([colorvert.glsl](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_04_2_color/data/colorvert.glsl) exerpt)
+([colorvert.glsl](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_04_2_color/data/colorvert.glsl) excerpt)
 ```glsl
 attribute vec4 color;
 varying vec4 vertColor;
@@ -488,7 +506,7 @@ void main() {
 ```
 <!-- .element: class="fragment" data-fragment-index="1"-->
 
-([colorfrag.glsl](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_04_2_color/data/colorfrag.glsl) exerpt)
+([colorfrag.glsl](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_04_2_color/data/colorfrag.glsl) excerpt)
 ```glsl
 varying vec4 vertColor;
 void main() {
@@ -496,6 +514,187 @@ void main() {
 }
 ```
 <!-- .element: class="fragment" data-fragment-index="2"-->
+
+H:
+
+## Texture shaders
+### Simple texture
+
+<figure>
+    <img height="400" src="fig/chowmein.png">
+    <figcaption>Texture shader output (source code available [here](https://github.com/codeanticode/pshader-tutorials/tree/master/intro/Ex_05_1_texture))</figcaption>
+</figure>
+
+V:
+
+## Texture shaders: Design patterns
+### Simple texture
+
+> Rule 1: Data sent from the sketch to the shaders
+
+([texvert.glsl](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_05_1_texture/data/texvert.glsl) excerpt)
+```glsl
+...
+uniform mat4 texMatrix;
+attribute vec2 texCoord;
+```
+<!-- .element: class="fragment" data-fragment-index="1"-->
+
+([texfrag.glsl](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_05_1_texture/data/texfrag.glsl) excerpt)
+```glsl
+uniform sampler2D texture;
+...
+```
+<!-- .element: class="fragment" data-fragment-index="2"-->
+
+V:
+
+## Texture shaders: Design patterns
+### Simple texture
+
+> Rule 2: Passing data among shaders
+
+([texvert.glsl](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_05_1_texture/data/texvert.glsl) excerpt)
+```glsl
+...
+uniform mat4 texMatrix;
+attribute vec2 texCoord;
+varying vec4 vertTexCoord;
+void main() {
+  ...
+  vertTexCoord = texMatrix * vec4(texCoord, 1.0, 1.0);
+}
+```
+<!-- .element: class="fragment" data-fragment-index="1"-->
+
+([texfrag.glsl](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_05_1_texture/data/texfrag.glsl) excerpt)
+```glsl
+uniform sampler2D texture;
+varying vec4 vertColor;
+varying vec4 vertTexCoord;
+
+void main() {
+  gl_FragColor = texture2D(texture, vertTexCoord.st) * vertColor;
+}
+```
+<!-- .element: class="fragment" data-fragment-index="2"-->
+
+N:
+
+The texture * vertColor product is consistent:
+* vertColor is in [0..1]
+* texture2D(texture, vertTexCoord.st) is also in [0..1]
+
+V:
+
+## Texture shaders
+### Pixelation effect
+
+<figure>
+    <img height="400" src="fig/bintex.png">
+    <figcaption>Pixelation shader output</figcaption>
+</figure>
+
+V:
+
+## Texture shaders
+### Pixelation effect
+
+We can sample the texels in virtually any way we want, and this allow us to create different types of effects. For example, we can discretize the texture coordinates as follows:
+
+```glsl
+uniform sampler2D texture;
+
+varying vec4 vertColor;
+varying vec4 vertTexCoord;
+
+void main() {
+  int si = int(vertTexCoord.s * 50.0);
+  int sj = int(vertTexCoord.t * 50.0);  
+  gl_FragColor = texture2D(texture, vec2(float(si) / 50.0, float(sj) / 50.0)) * vertColor;  
+}
+```
+
+V:
+
+## Texture shaders
+### Pixelation effect
+#### Pixelator.pde code
+
+The constant 50 can be converted into an *uniform* variable (```binsize```) to be controlled from the sketch:
+
+```java
+PImage label;
+PShape can;
+float angle;
+
+PShader pixelator;
+
+void setup() {
+  size(640, 360, P3D);  
+  label = loadImage("lachoy.jpg");
+  can = createCan(100, 200, 32, label);
+  pixelator = loadShader("pixel.glsl");
+}
+
+void draw() {    
+  background(0);
+
+  pixelator.set("binsize", 100.0 * float(mouseX) / width);
+  shader(pixelator);
+    
+  translate(width/2, height/2);
+  rotateY(angle);  
+  shape(can);  
+  angle += 0.01;
+}
+
+PShape createCan(float r, float h, int detail, PImage tex) {
+  textureMode(NORMAL);
+  PShape sh = createShape();
+  sh.beginShape(QUAD_STRIP);
+  sh.noStroke();
+  sh.texture(tex);
+  for (int i = 0; i <= detail; i++) {
+    float angle = TWO_PI / detail;
+    float x = sin(i * angle);
+    float z = cos(i * angle);
+    float u = float(i) / detail;
+    sh.normal(x, 0, z);
+    sh.vertex(x * r, -h/2, z * r, u, 0);
+    sh.vertex(x * r, +h/2, z * r, u, 1);    
+  }
+  sh.endShape(); 
+  return sh;
+}
+```
+
+V:
+
+## Texture shaders
+### Pixelation effect
+#### pixel.glsl code
+
+```glsl
+uniform sampler2D texture;
+
+varying vec4 vertColor;
+varying vec4 vertTexCoord;
+
+uniform float binsize;
+
+void main() {
+  int si = int(vertTexCoord.s * binsize);
+  int sj = int(vertTexCoord.t * binsize);  
+  gl_FragColor = texture2D(texture, vec2(float(si) / binsize, float(sj) / binsize)) * vertColor;  
+}
+```
+
+H:
+
+## Light shaders
+
+
 
 H:
 
@@ -691,96 +890,6 @@ void main() {
 V:
 
 <img width="640" src="fig/emboss.png">
-
-H:
-
-### Pixelation shader
-
-We can sample the texels in virtually in any way we want, and this allow us to create different types of effects. For example, we can discretize the texture coordinates as follows:
-
-```glsl
-uniform sampler2D texture;
-
-varying vec4 vertColor;
-varying vec4 vertTexCoord;
-
-void main() {
-  int si = int(vertTexCoord.s * 50.0);
-  int sj = int(vertTexCoord.t * 50.0);  
-  gl_FragColor = texture2D(texture, vec2(float(si) / 50.0, float(sj) / 50.0)) * vertColor;  
-}
-```
-
-V:
-
-<img width="640" src="fig/bintex.png">
-
-V:
-
-The constant 50 can converted into an unifom variable and controlled from the sketch:
-
-```java
-PImage label;
-PShape can;
-float angle;
-
-PShader pixelator;
-
-void setup() {
-  size(640, 360, P3D);  
-  label = loadImage("lachoy.jpg");
-  can = createCan(100, 200, 32, label);
-  pixelator = loadShader("pixel.glsl");
-}
-
-void draw() {    
-  background(0);
-
-  pixelator.set("binsize", 100.0 * float(mouseX) / width);
-  shader(pixelator);
-    
-  translate(width/2, height/2);
-  rotateY(angle);  
-  shape(can);  
-  angle += 0.01;
-}
-
-PShape createCan(float r, float h, int detail, PImage tex) {
-  textureMode(NORMAL);
-  PShape sh = createShape();
-  sh.beginShape(QUAD_STRIP);
-  sh.noStroke();
-  sh.texture(tex);
-  for (int i = 0; i <= detail; i++) {
-    float angle = TWO_PI / detail;
-    float x = sin(i * angle);
-    float z = cos(i * angle);
-    float u = float(i) / detail;
-    sh.normal(x, 0, z);
-    sh.vertex(x * r, -h/2, z * r, u, 0);
-    sh.vertex(x * r, +h/2, z * r, u, 1);    
-  }
-  sh.endShape(); 
-  return sh;
-}
-```
-
-V:
-
-```glsl
-uniform sampler2D texture;
-
-varying vec4 vertColor;
-varying vec4 vertTexCoord;
-
-uniform float binsize;
-
-void main() {
-  int si = int(vertTexCoord.s * binsize);
-  int sj = int(vertTexCoord.t * binsize);  
-  gl_FragColor = texture2D(texture, vec2(float(si) / binsize, float(sj) / binsize)) * vertColor;  
-}
-```
 
 H:
 
