@@ -1,8 +1,8 @@
-PShader emboss;
+PShader sharpen;
 
 void setup() {
   size(400, 400, P3D); 
-  emboss = loadShader("emboss.glsl");  
+  sharpen = loadShader("sharpen.glsl");  
 }
 
 void draw() {
@@ -13,5 +13,5 @@ void draw() {
   rotateY(frameCount * 0.01);
   box(100);
 
-  filter(emboss);
+  filter(sharpen);
 }
