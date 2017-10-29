@@ -777,6 +777,8 @@ V:
 ### Lighting parameters: per vertex diffuse light
 #### Observation about the [normal matrix](http://www.lighthouse3d.com/tutorials/glsl-12-tutorial/the-normal-matrix/)
 
+Let $M$ be $ModelView(4;4)$ (i.e., it is formed by deleting row and column 4 from the ModelView)
+
 > Multiplying the input ```normal``` vector by the ```normalMatrix```, i.e., `$({M^{-1})}^T$`, yields its coordinates in the eye-frame
 
 V:
@@ -804,6 +806,7 @@ V:
 
 ```glsl
 //excerpt from lightvert.glsl
+uniform vec4 lightPosition;
 varying vec4 vertColor;
 
 void main() {
