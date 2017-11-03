@@ -969,9 +969,9 @@ V:
 ## Light shaders
 ### Suggested workshop
 
-> Shader simple lighting and material application
+> Simple lighting and material
 
-Ideas:
+Tasks
 
 1. Combine all the simple lighting models using per-vertex and per-pixel shaders
 2. Use up to 8 lights in the model
@@ -1149,11 +1149,11 @@ V:
 ## Convolution filters
 ### Suggested workshop
 
-> Convolution filters application
+> Convolution filters
 
-Ideas:
+Tasks
 
-1. Support some common [convolution kernels](https://en.wikipedia.org/wiki/Kernel_(image_processing) by default
+1. Support some common [convolution kernels](https://en.wikipedia.org/wiki/Kernel_(image_processing) using fragment shaders
 2. Allow customization of convolution kernels
 3. Filter both image and video files
 
