@@ -973,9 +973,9 @@ V:
 
 Ideas:
 
-1. Combine all the simple lighting models using several shaders
+1. Combine all the simple lighting models using per-vertex and per-pixel shaders
 2. Use up to 8 lights in the model
-3. Add [Warn lights](https://books.google.com.co/books?id=pCwwxlMuNycC&pg=PA113&lpg=PA113&dq=shader+warn+light+model&source=bl&ots=vVu814VVAU&sig=nKGlD6fpT6pl5U1GUcdhIJxEQQQ&hl=en&sa=X&ved=0ahUKEwipp_bQ9e3TAhVEPiYKHS5wC3wQ6AEIJTAA#v=onepage&q=shader%20warn%20light%20model&f=false)
+3. Implement other simple light model such as [normal mapping]() or [Warn lights](https://books.google.com.co/books?id=pCwwxlMuNycC&pg=PA113&lpg=PA113&dq=shader+warn+light+model&source=bl&ots=vVu814VVAU&sig=nKGlD6fpT6pl5U1GUcdhIJxEQQQ&hl=en&sa=X&ved=0ahUKEwipp_bQ9e3TAhVEPiYKHS5wC3wQ6AEIJTAA#v=onepage&q=shader%20warn%20light%20model&f=false)
 
 H:
 
@@ -1156,7 +1156,8 @@ Ideas:
 1. Support some common [convolution kernels](https://en.wikipedia.org/wiki/Kernel_(image_processing) by default
 2. Allow customization of convolution kernels
 3. Filter both image and video files
-4. Use the [(fast) Fourier transform](http://lodev.org/cgtutor/filtering.html) to fast apply the filters
+
+Idea for a project: use the [(fast) Fourier transform](http://lodev.org/cgtutor/filtering.html) to fast apply the filters
 
 H:
 
