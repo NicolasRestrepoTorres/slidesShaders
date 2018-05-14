@@ -151,7 +151,7 @@ V:
 
 ## Intro: Shader example
 
-[Proscene picking buffer fragment shader](https://github.com/remixlab/proscene/blob/master/data/PickingBuffer.frag)
+[Frames picking buffer fragment shader](https://github.com/VisualComputing/framesjs/blob/processing/data/PickingBuffer.frag)
 
 <img height='400' src='fig/pickingbuffer.png'/>
 
@@ -159,7 +159,7 @@ V:
 
 ## Intro: Shader example
 
-[Proscene picking buffer fragment shader](https://github.com/remixlab/proscene/blob/master/data/PickingBuffer.frag)
+[Frames picking buffer fragment shader](https://github.com/VisualComputing/framesjs/blob/processing/data/PickingBuffer.frag)
 
 ```glsl
 uniform vec3 id;
@@ -575,6 +575,9 @@ void main() {
   vertTexCoord = texMatrix * vec4(texCoord, 1.0, 1.0);
 }
 ```
+
+> texMatrix rescales the texture coordinates (texCoord): inversion along the Y-axis, and non-power-of-two textures
+<!-- .element: class="fragment" data-fragment-index="1"-->
 
 V:
 
