@@ -487,8 +487,8 @@ H:
 ## Passive transformation shaders
 
 <figure>
-    <img height="400" src="fig/color.png">
-    <figcaption>Color shader output (source code available [here](https://github.com/codeanticode/pshader-tutorials/tree/master/intro/Ex_04_2_color))</figcaption>
+    <img height="400" src="fig/transformations.png">
+    <figcaption>Passive transformation shaders output (source code available [here](https://github.com/VisualComputing/Shaders/tree/gh-pages/sketches/desktop/PassiveTransformations)</figcaption>
 </figure>
 
 H:
