@@ -488,8 +488,72 @@ H:
 
 <figure>
     <img height="400" src="fig/transformations.png">
-    <figcaption>Passive transformation shaders output (source code available [here](https://github.com/VisualComputing/Shaders/tree/gh-pages/sketches/desktop/PassiveTransformations)</figcaption>
+    <figcaption>Passive transformation shaders output (source code available [here](https://github.com/VisualComputing/Shaders/tree/gh-pages/sketches/desktop/PassiveTransformations))</figcaption>
 </figure>
+
+V:
+
+## Passive transformation shaders: Design patterns
+
+> Pattern 1: Data sent from the sketch to the shaders
+
+([frame_vert_pmv.glsl](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/PassiveTransformations/data/frame_vert_pmv.glsl) excerpt)
+```glsl
+...
+uniform mat4 frames_transform;
+attribute vec4 vertex;
+
+void main() {
+  gl_Position = frames_transform * vertex;
+  ...
+}
+```
+
+V:
+
+## Passive transformation shaders: Design patterns
+
+The `setUniforms()` method of the [PassiveTransformations sketch](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/PassiveTransformations/PassiveTransformations.pde) is used to pass the `projection * modelview` matrix
+
+```java
+// excerpt of PassiveTransformations.pde
+...
+Graph graph;
+PShader framesShader;
+Matrix pmv;
+PMatrix3D pmatrix = new PMatrix3D();
+Frame[] frames;
+
+void setup() {
+  graph = new Graph(width, height);
+  framesShader = loadShader("frame_frag.glsl", "frame_vert_pmv.glsl");
+  frames = new Frame[50];
+  for (int i = 0; i < frames.length; i++)
+    frames[i] = Frame.random(new Vector(), 100, g.is3D());
+  ...
+}
+
+void draw() {
+  ...
+  graph.preDraw();
+  for (int i = 0; i < frames.length; i++) {
+    graph.pushModelView();
+    graph.applyModelView(frames[i].matrix());
+    //model-view changed:
+    setUniforms();
+    fill(0, frames[i].isTracked(graph) ? 0 : 255, 255);
+    box(5);
+    graph.popModelView();
+  }
+}
+
+void setUniforms() {
+  shader(framesShader);
+  pmv = Matrix.multiply(graph.projection(), graph.modelView());
+  pmatrix.set(pmv.get(new float[16]));
+  framesShader.set("frames_transform", pmatrix);
+}
+```
 
 H:
 
