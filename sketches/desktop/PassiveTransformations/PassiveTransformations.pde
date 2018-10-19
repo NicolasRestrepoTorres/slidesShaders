@@ -19,19 +19,17 @@ void setup() {
   frames = new Frame[50];
   for (int i = 0; i < frames.length; i++)
     frames[i] = Frame.random(new Vector(), 100, g.is3D());
+  //discard Processing matrices
+  resetMatrix();
 }
 
 void draw() {
   graph.preDraw();
   background(0);
-  //discard Processing matrices
-  resetMatrix();
-  //set initial model-view and projection matrices
-  setUniforms();
   for (int i = 0; i < frames.length; i++) {
     graph.pushModelView();
     graph.applyModelView(frames[i].matrix());
-    //model-view changed:
+    // model-view changed:
     setUniforms();
     fill(0, frames[i].isTracked(graph) ? 0 : 255, 255);
     box(5);
@@ -56,7 +54,7 @@ void mouseWheel(MouseEvent event) {
   graph.scale(event.getCount() * 20);
 }
 
-//Whenever the model-view (or projection) matrices changes
+// Whenever the model-view (or projection) matrices changes
 // we need to update the shader:
 void setUniforms() {
   shader(framesShader);
