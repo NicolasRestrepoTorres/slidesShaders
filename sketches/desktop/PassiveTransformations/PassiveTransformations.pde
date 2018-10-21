@@ -1,10 +1,8 @@
 import frames.core.*;
 import frames.primitives.*;
+import frames.processing.*;
 
 Graph graph;
-PShader framesShader;
-Matrix pmv;
-PMatrix3D pmatrix = new PMatrix3D();
 Frame[] frames;
 
 void settings() {
@@ -13,28 +11,31 @@ void settings() {
 
 void setup() {
   graph = new Graph(width, height);
+  GLSLMatrixHandler glslMatrixHandler = new GLSLMatrixHandler(graph);
+  graph.setMatrixHandler(glslMatrixHandler);
   graph.setFieldOfView(PI / 3);
   graph.fitBallInterpolation();
-  framesShader = loadShader("frame_frag.glsl", "frame_vert_pmv.glsl");
   frames = new Frame[50];
-  for (int i = 0; i < frames.length; i++)
-    frames[i] = Frame.random(new Vector(), 100, g.is3D());
+  for (int i = 0; i < frames.length; i++) {
+    frames[i] = new Frame(graph) {
+      @Override
+        public void visit() {
+        pushStyle();
+        fill(isTracked(graph) ? 0 : 255, 0, 255);
+        box(5);
+        popStyle();
+      }
+    };
+    frames[i].randomize();
+  }
   //discard Processing matrices
   resetMatrix();
 }
 
 void draw() {
-  graph.preDraw();
   background(0);
-  for (int i = 0; i < frames.length; i++) {
-    graph.pushModelView();
-    graph.applyModelView(frames[i].matrix());
-    // model-view changed:
-    setUniforms();
-    fill(0, frames[i].isTracked(graph) ? 0 : 255, 255);
-    box(5);
-    graph.popModelView();
-  }
+  graph.preDraw();
+  graph.traverse();
 }
 
 void mouseMoved() {
@@ -54,11 +55,22 @@ void mouseWheel(MouseEvent event) {
   graph.scale(event.getCount() * 20);
 }
 
-// Whenever the model-view (or projection) matrices changes
-// we need to update the shader:
-void setUniforms() {
-  shader(framesShader);
-  pmv = Matrix.multiply(graph.projection(), graph.modelView());
-  pmatrix.set(pmv.get(new float[16]));
-  framesShader.set("frames_transform", pmatrix);
+public class GLSLMatrixHandler extends MatrixHandler {
+  PShader framesShader;
+  PMatrix3D pmatrix = new PMatrix3D();
+
+  public GLSLMatrixHandler(Graph graph) {
+    super(graph);
+    framesShader = loadShader("frame_frag.glsl", "frame_vert_pmv.glsl");
+  }
+
+  @Override
+    protected void _setUniforms() {
+    shader(framesShader);
+    // same as:
+    //pmatrix.set(Scene.toPMatrix(projectionModelView()));
+    //pmatrix.transpose();
+    pmatrix.set(projectionModelView().get(new float[16]));
+    framesShader.set("frames_transform", pmatrix);
+  }
 }
