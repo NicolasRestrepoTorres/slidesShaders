@@ -153,7 +153,7 @@ V:
 
 ## Intro: Shader example
 
-[Frames picking buffer fragment shader](https://github.com/VisualComputing/framesjs/blob/processing/data/PickingBuffer.frag)
+[Frames picking buffer fragment shader](https://github.com/VisualComputing/frames/blob/master/data/PickingBuffer.frag)
 
 <img height='400' src='fig/pickingbuffer.png'/>
 
@@ -161,7 +161,7 @@ V:
 
 ## Intro: Shader example
 
-[Frames picking buffer fragment shader](https://github.com/VisualComputing/framesjs/blob/processing/data/PickingBuffer.frag)
+[Frames picking buffer fragment shader](https://github.com/VisualComputing/frames/blob/master/data/PickingBuffer.frag)
 
 ```glsl
 uniform vec3 id;
