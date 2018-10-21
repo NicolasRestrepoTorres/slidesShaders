@@ -19,7 +19,7 @@ void setup() {
   for (int i = 0; i < frames.length; i++) {
     frames[i] = new Frame(graph) {
       @Override
-        public void visit() {
+      public void visit() {
         pushStyle();
         fill(isTracked(graph) ? 0 : 255, 0, 255);
         box(5);
@@ -65,7 +65,7 @@ public class GLSLMatrixHandler extends MatrixHandler {
   }
 
   @Override
-    protected void _setUniforms() {
+  protected void _setUniforms() {
     shader(framesShader);
     // same as:
     //pmatrix.set(Scene.toPMatrix(projectionModelView()));
