@@ -155,7 +155,10 @@ V:
 
 [Frames picking buffer fragment shader](https://github.com/VisualComputing/frames/blob/master/data/PickingBuffer.frag)
 
-<img height='400' src='fig/pickingbuffer.png'/>
+<figure>
+    <img height="400" src="fig/scenebuffers.png">
+    <figcaption>[SceneBuffers frames' example](https://github.com/VisualComputing/frames/blob/master/examples/demos/SceneBuffers/SceneBuffers.pde)</figcaption>
+</figure>
 
 V:
 
