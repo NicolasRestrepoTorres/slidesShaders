@@ -322,7 +322,7 @@ V:
 
 > Sets the uniform variables inside the shader to modify the effect while the program is running
 
-Method signatures for vector uniform variables:
+Method signatures for _texture_ uniform variables:
 
 ```processing
   .set(name, tex) // tex is a PImage
@@ -334,7 +334,7 @@ V:
 
 > Sets the uniform variables inside the shader to modify the effect while the program is running
 
-Example:
+Example to set `mat4` uniform variables:
 
 ```processing
   PShader unalShader;
