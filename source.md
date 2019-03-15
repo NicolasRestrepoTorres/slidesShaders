@@ -373,20 +373,31 @@ V:
 
 ## Shader design patterns
 ### Pattern 1: Data sent from the sketch to the shaders
-#### Shader types
+#### Attribute variables
 
-| Primitive type | Shader type |   Pre-processor #defines   |
-|----------------|:-----------:|:--------------------------:|
-| Point          | POINT       | PROCESSING_POINT_SHADER    |
-| Line           | LINE        | PROCESSING_LINE_SHADER     |
-| Triangle       | COLOR       | PROCESSING_COLOR_SHADER    |
-| Triangle       | LIGHT       | PROCESSING_LIGHT_SHADER    |
-| Triangle       | TEXTURE     | PROCESSING_TEXTURE_SHADER  |
-| Triangle       | TEXLIGHT    | PROCESSING_TEXLIGHT_SHADER |
+| Processing methods    | Type   | Attribute  |
+|-----------------------|:------:|:----------:|
+| `vertex()`            | `vec4` | `vertex`   |
+| `stroke()`, `fill()`  | `vec4` | `color`    |
+| `normal()`, `shape()` | `vec3` | `normal`   |
+| `vertex()`            | `vec2` | `texCoord` |
 
-N:
+V:
 
-* Processing shader type auto-detection utility
+## Shader design patterns
+### Pattern 1: Data sent from the sketch to the shaders
+#### Uniform variables
+
+| Processing methods                                                 | Type        | Uniform        |
+|--------------------------------------------------------------------|:-----------:|:--------------:|
+| `orhto()`, `perspective()`                                         | `mat4`      | `projection`   |
+| `applyMatrix()`, `translate()`, `rotate()`, `scale()`              | `mat4`      | `modelview`    |
+| `applyMatrix()`, `translate()`, `rotate()`, `scale()`              | `mat3`      | `normalMatrix` |
+| `texture()`                                                        | `mat4`      | `texMatrix`    |
+| `texture()`                                                        | `sampler2D` | `texture`      |
+| `texture()`                                                        | `vec2`      | `texOffset`    |
+| `lights()`, `ambientLight()`, `spotLight()`, `directionalLight()`  | `vec4`      | `lightPosition` |
+
 
 V:
 
