@@ -69,9 +69,9 @@ public class GLSLMatrixHandler extends MatrixHandler {
   @Override
   protected void _setUniforms() {
     shader(_shader);
+    //_pmatrix.set(Scene.toPMatrix(projectionModelView()));
+    //_pmatrix.transpose();
     // same as:
-    //pmatrix.set(Scene.toPMatrix(projectionModelView()));
-    //pmatrix.transpose();
     _pmatrix.set(projectionModelView().get(new float[16]));
     _shader.set("nodes_transform", _pmatrix);
   }
