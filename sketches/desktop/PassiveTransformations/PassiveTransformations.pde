@@ -1,9 +1,9 @@
-import frames.core.*;
-import frames.primitives.*;
-import frames.processing.*;
+import nub.core.*;
+import nub.primitives.*;
+import nub.processing.*;
 
 Graph graph;
-Frame[] frames;
+Node[] nodes;
 
 void settings() {
   size(800, 800, P3D);
@@ -13,11 +13,12 @@ void setup() {
   graph = new Graph(width, height);
   GLSLMatrixHandler glslMatrixHandler = new GLSLMatrixHandler(graph);
   graph.setMatrixHandler(glslMatrixHandler);
-  graph.setFieldOfView(PI / 3);
-  graph.fitBallInterpolation();
-  frames = new Frame[50];
-  for (int i = 0; i < frames.length; i++) {
-    frames[i] = new Frame(graph) {
+  //graph.setFOV(PI / 3);
+  //graph.togglePerspective();
+  graph.fit(1);
+  nodes = new Node[50];
+  for (int i = 0; i < nodes.length; i++) {
+    nodes[i] = new Node(graph) {
       @Override
       public void visit() {
         pushStyle();
@@ -26,7 +27,7 @@ void setup() {
         popStyle();
       }
     };
-    frames[i].randomize();
+    nodes[i].randomize();
   }
   //discard Processing matrices
   resetMatrix();
@@ -34,12 +35,13 @@ void setup() {
 
 void draw() {
   background(0);
+  //resetMatrix();
   graph.preDraw();
-  graph.traverse();
+  graph.render();
 }
 
 void mouseMoved() {
-  graph.track(mouseX, mouseY, frames);
+  graph.track(mouseX, mouseY, nodes);
 }
 
 void mouseDragged() {
@@ -56,21 +58,21 @@ void mouseWheel(MouseEvent event) {
 }
 
 public class GLSLMatrixHandler extends MatrixHandler {
-  PShader framesShader;
-  PMatrix3D pmatrix = new PMatrix3D();
+  PShader _shader;
+  PMatrix3D _pmatrix = new PMatrix3D();
 
   public GLSLMatrixHandler(Graph graph) {
-    super(graph);
-    framesShader = loadShader("frame_frag.glsl", "frame_vert_pmv.glsl");
+    super(graph.width(), graph.height());
+    _shader = loadShader("frag.glsl", "vert.glsl");
   }
 
   @Override
   protected void _setUniforms() {
-    shader(framesShader);
+    shader(_shader);
     // same as:
     //pmatrix.set(Scene.toPMatrix(projectionModelView()));
     //pmatrix.transpose();
-    pmatrix.set(projectionModelView().get(new float[16]));
-    framesShader.set("frames_transform", pmatrix);
+    _pmatrix.set(projectionModelView().get(new float[16]));
+    _shader.set("nodes_transform", _pmatrix);
   }
 }
