@@ -13,8 +13,7 @@ void setup() {
   graph = new Graph(width, height);
   GLSLMatrixHandler glslMatrixHandler = new GLSLMatrixHandler(graph);
   graph.setMatrixHandler(glslMatrixHandler);
-  //graph.setFOV(PI / 3);
-  //graph.togglePerspective();
+  graph.setFOV(PI / 3);
   graph.fit(1);
   nodes = new Node[50];
   for (int i = 0; i < nodes.length; i++) {
@@ -28,6 +27,7 @@ void setup() {
       }
     };
     nodes[i].randomize();
+    nodes[i].setPickingThreshold(20);
   }
   //discard Processing matrices
   resetMatrix();
