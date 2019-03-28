@@ -153,18 +153,18 @@ V:
 
 ## Intro: Shader example
 
-[Frames picking buffer fragment shader](https://github.com/VisualComputing/frames/blob/master/data/PickingBuffer.frag)
+[Nodes picking buffer fragment shader](https://github.com/VisualComputing/frames/blob/master/data/PickingBuffer.frag)
 
 <figure>
     <img height="400" src="fig/scenebuffers.png">
-    <figcaption>[SceneBuffers frames' example](https://github.com/VisualComputing/frames/blob/master/examples/demos/SceneBuffers/SceneBuffers.pde)</figcaption>
+    <figcaption>[SceneBuffers nodes' example](https://github.com/VisualComputing/frames/blob/master/examples/demos/SceneBuffers/SceneBuffers.pde)</figcaption>
 </figure>
 
 V:
 
 ## Intro: Shader example
 
-[Frames picking buffer fragment shader](https://github.com/VisualComputing/frames/blob/master/data/PickingBuffer.frag)
+[Nodes picking buffer fragment shader](https://github.com/VisualComputing/frames/blob/master/data/PickingBuffer.frag)
 
 ```glsl
 uniform vec3 id;
@@ -427,11 +427,11 @@ V:
 ## Shader design patterns
 ### Pattern 3: Consistency of geometry operations
 
-> Geometry operations should always be carried out under the same reference frame
+> Geometry operation operands should be defined in the same coordinate system
 
 <li class="fragment"> Tip 1: ```transform * vertex // projection * modelview * vertex``` yields the vertex coordinates in [clip-space](http://www.songho.ca/opengl/gl_transform.html)
 <li class="fragment"> Tip 2: ```modelview * vertex``` yields the vertex coordinates in eye-space
-<li class="fragment"> Tip 3: Since the eye position is 0 in eye-space, eye-space is the usual reference frame for geometry operations 
+<li class="fragment"> Tip 3: Since the eye position is 0 in eye-space, eye-space is the usual coordinate system for geometry operations 
 
 H:
 
@@ -511,14 +511,14 @@ V:
 
 > Pattern 1: Data sent from the sketch to the shaders
 
-([frame_vert_pmv.glsl](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/PassiveTransformations/data/frame_vert_pmv.glsl) excerpt)
+([vert.glsl](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/PassiveTransformations/data/vert.glsl) excerpt)
 ```glsl
 ...
-uniform mat4 frames_transform;
+uniform mat4 nodes_transform;
 attribute vec4 vertex;
 
 void main() {
-  gl_Position = frames_transform * vertex;
+  gl_Position = nodes_transform * vertex;
   ...
 }
 ```
@@ -528,13 +528,13 @@ V:
 ## Passive transformation shaders: Design patterns
 ### [PassiveTransformations sketch](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/PassiveTransformations/PassiveTransformations.pde)
 
-A custom [MatrixHandler](https://visualcomputing.github.io/frames-javadocs/frames/core/MatrixHandler.html) is implemented to pass the frames' `projection * modelview` matrix to a custom shader
+A custom [MatrixHandler](https://visualcomputing.github.io/frames-javadocs/frames/core/MatrixHandler.html) is implemented to pass the nodes' `projection * modelview` matrix to a custom shader
 
 ```java
 // excerpt of PassiveTransformations.pde
 
 Graph graph;
-Frame[] frames;
+Node[] nodes;
 
 void setup() {
   graph = new Graph(width, height);
@@ -547,26 +547,28 @@ void setup() {
 
 void draw() {
   background(0);
-  // sets up the initial frames' matrices according to user interaction
+  // sets up the initial nodes' matrices according to user interaction
   graph.preDraw();
   graph.traverse();
 }
 
 public class GLSLMatrixHandler extends MatrixHandler {
-  PShader framesShader;
-  PMatrix3D pmatrix = new PMatrix3D();
+  PShader _shader;
+  PMatrix3D _pmatrix = new PMatrix3D();
 
   public GLSLMatrixHandler(Graph graph) {
-    super(graph);
-    framesShader = loadShader("frame_frag.glsl", "frame_vert_pmv.glsl");
+    super(graph.width(), graph.height());
+    _shader = loadShader("frag.glsl", "vert.glsl");
   }
 
   @Override
   protected void _setUniforms() {
-    shader(framesShader);
-    // converts Matrix to PMatrix and send it to the custom shader
-    pmatrix.set(projectionModelView().get(new float[16]));
-    framesShader.set("frames_transform", pmatrix);
+    shader(_shader);
+    //_pmatrix.set(Scene.toPMatrix(projectionModelView()));
+    //_pmatrix.transpose();
+    // same as:
+    _pmatrix.set(projectionModelView().get(new float[16]));
+    _shader.set("nodes_transform", _pmatrix);
   }
 }
 ```
@@ -873,7 +875,7 @@ V:
 
 Let $M$ be $ModelView(4;4)$ (i.e., it is formed by deleting row and column 4 from the ModelView)
 
-> Multiplying the input ```normal``` vector by the ```normalMatrix```, i.e., `$({M^{-1})}^T$`, yields its coordinates in the eye-frame
+> Multiplying the input ```normal``` vector by the ```normalMatrix```, i.e., `$({M^{-1})}^T$`, yields its coordinates in the eye-node
 
 V:
 
@@ -905,8 +907,8 @@ varying vec4 vertColor;
 
 void main() {
   ...
-  vec3 ecPosition = vec3(modelview * position);//eye-frame
-  vec3 ecNormal = normalize(normalMatrix * normal);//eye-frame
+  vec3 ecPosition = vec3(modelview * position);//eye coordinate system
+  vec3 ecNormal = normalize(normalMatrix * normal);//eye coordinate system
   vec3 direction = normalize(lightPosition.xyz - ecPosition);//Pattern 3   
   float intensity = max(0.0, dot(direction, ecNormal));//Pattern 3
   vertColor = vec4(intensity, intensity, intensity, 1) * color;
