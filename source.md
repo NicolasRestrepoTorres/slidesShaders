@@ -153,18 +153,18 @@ V:
 
 ## Intro: Shader example
 
-[Nodes picking buffer fragment shader](https://github.com/VisualComputing/frames/blob/master/data/PickingBuffer.frag)
+[Nub picking buffer fragment shader](https://github.com/VisualComputing/nubjs/blob/processing/data/PickingBuffer.frag)
 
 <figure>
     <img height="400" src="fig/scenebuffers.png">
-    <figcaption>[SceneBuffers nodes' example](https://github.com/VisualComputing/frames/blob/master/examples/demos/SceneBuffers/SceneBuffers.pde)</figcaption>
+    <figcaption>[SceneBuffers nodes' example](https://github.com/VisualComputing/nubjs/tree/processing/examples/basics/SceneBuffers/SceneBuffers.pde)</figcaption>
 </figure>
 
 V:
 
 ## Intro: Shader example
 
-[Nodes picking buffer fragment shader](https://github.com/VisualComputing/frames/blob/master/data/PickingBuffer.frag)
+[Nub picking buffer fragment shader](https://github.com/VisualComputing/nubjs/blob/processing/data/PickingBuffer.frag)
 
 ```glsl
 uniform vec3 id;
@@ -528,7 +528,7 @@ V:
 ## Passive transformation shaders: Design patterns
 ### [PassiveTransformations sketch](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/PassiveTransformations/PassiveTransformations.pde)
 
-A custom [MatrixHandler](https://visualcomputing.github.io/frames-javadocs/frames/core/MatrixHandler.html) is implemented to pass the nodes' `projection * modelview` matrix to a custom shader
+A custom [MatrixHandler](https://visualcomputing.github.io/nub-javadocs/nub/core/MatrixHandler.html) is implemented to pass the nodes' `projection * modelview` matrix to a custom shader
 
 ```java
 // excerpt of PassiveTransformations.pde
