@@ -10,8 +10,8 @@ void settings() {
 }
 
 void setup() {
-  graph = new Graph(width, height);
-  GLSLMatrixHandler glslMatrixHandler = new GLSLMatrixHandler(graph);
+  graph = new Graph(g, width, height);
+  GLSLMatrixHandler glslMatrixHandler = new GLSLMatrixHandler();
   graph.setMatrixHandler(glslMatrixHandler);
   graph.setFOV(PI / 3);
   graph.fit(1);
@@ -61,8 +61,7 @@ public class GLSLMatrixHandler extends MatrixHandler {
   PShader _shader;
   PMatrix3D _pmatrix = new PMatrix3D();
 
-  public GLSLMatrixHandler(Graph graph) {
-    super(graph.width(), graph.height());
+  public GLSLMatrixHandler() {
     _shader = loadShader("frag.glsl", "vert.glsl");
   }
 
@@ -72,7 +71,7 @@ public class GLSLMatrixHandler extends MatrixHandler {
     //_pmatrix.set(Scene.toPMatrix(projectionModelView()));
     //_pmatrix.transpose();
     // same as:
-    _pmatrix.set(projectionModelView().get(new float[16]));
-    _shader.set("nodes_transform", _pmatrix);
+    _pmatrix.set(transform().get(new float[16]));
+    _shader.set("nub_transform", _pmatrix);
   }
 }
