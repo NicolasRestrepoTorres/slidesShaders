@@ -153,18 +153,18 @@ V:
 
 ## Intro: Shader example
 
-[Nub picking buffer fragment shader](https://github.com/VisualComputing/nubjs/blob/processing/data/PickingBuffer.frag)
+[Nub picking buffer fragment shader](https://github.com/nakednous/nub/blob/master/data/PickingBuffer.frag)
 
 <figure>
     <img height="400" src="fig/scenebuffers.png">
-    <figcaption>[SceneBuffers nodes' example](https://github.com/VisualComputing/nubjs/tree/processing/examples/basics/SceneBuffers/SceneBuffers.pde)</figcaption>
+    <figcaption>[SceneBuffers nub example](https://github.com/nakednous/nub/blob/master/examples/basics/SceneBuffers/SceneBuffers.pde)</figcaption>
 </figure>
 
 V:
 
 ## Intro: Shader example
 
-[Nub picking buffer fragment shader](https://github.com/VisualComputing/nubjs/blob/processing/data/PickingBuffer.frag)
+[Nub picking buffer fragment shader](https://github.com/nakednous/nub/blob/master/data/PickingBuffer.frag)
 
 ```glsl
 uniform vec3 id;
@@ -266,7 +266,7 @@ V:
 
 > Sets the uniform variables inside the shader to modify the effect while the program is running
 
-Method signatures for vector uniform variables `vec2`, `vec3` or `vec4`:
+Method signatures for vector uniform variables [vec2, vec3 or vec4](https://www.khronos.org/opengl/wiki/Data_Type_%28GLSL%29#Vectors):
 
 ```processing
   .set(name, x)
@@ -286,7 +286,7 @@ V:
 
 > Sets the uniform variables inside the shader to modify the effect while the program is running
 
-Method signatures for vector uniform variables `boolean[]`, `float[]`, `int[]`:
+Method signatures for vector uniform variables [boolean[], float[], int[]](https://www.khronos.org/opengl/wiki/Data_Type_%28GLSL%29#Arrays):
 
 ```processing
   .set(name, x)
@@ -306,7 +306,7 @@ V:
 
 > Sets the uniform variables inside the shader to modify the effect while the program is running
 
-Method signatures for `mat3` and `mat4` uniform variables:
+Method signatures for [mat3 and mat4](https://www.khronos.org/opengl/wiki/Data_Type_%28GLSL%29#Matrices) uniform variables:
 
 ```processing
   .set(name, mat) // mat is PMatrix2D, or PMatrix3D
@@ -373,20 +373,20 @@ V:
 
 ## Shader design patterns
 ### Pattern 1: Data sent from the sketch to the shaders
-#### Attribute variables
+#### (Frequently used) Attribute variables
 
 | Processing methods    | Type   | Attribute  |
 |-----------------------|:------:|:----------:|
 | `vertex()`            | `vec4` | `vertex`   |
+| `vertex()`            | `vec2` | `texCoord` |
 | `stroke()`, `fill()`  | `vec4` | `color`    |
 | `normal()`, `shape()` | `vec3` | `normal`   |
-| `vertex()`            | `vec2` | `texCoord` |
 
 V:
 
 ## Shader design patterns
 ### Pattern 1: Data sent from the sketch to the shaders
-#### Uniform variables
+#### (Frequently used) Uniform variables
 
 | Processing methods                                                 | Type        | Uniform        |
 |--------------------------------------------------------------------|:-----------:|:--------------:|
@@ -398,6 +398,13 @@ V:
 | `texture()`                                                        | `vec2`      | `texOffset`    |
 | `lights()`, `ambientLight()`, `spotLight()`, `directionalLight()`  | `vec4`      | `lightPosition` |
 
+
+V:
+
+## Shader design patterns
+### Pattern 1: Data sent from the sketch to the shaders
+
+> Check the [code](https://github.com/processing/processing/tree/master/core/src/processing/opengl/shaders) to consult all the attribute and uniform variables sent to the shaders
 
 V:
 
@@ -528,47 +535,35 @@ V:
 ## Passive transformation shaders: Design patterns
 ### [PassiveTransformations sketch](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/PassiveTransformations/PassiveTransformations.pde)
 
-A custom [MatrixHandler](https://visualcomputing.github.io/nub-javadocs/nub/core/MatrixHandler.html) is implemented to pass the nodes' `projection * modelview` matrix to a custom shader
+A custom [MatrixHandler](https://visualcomputing.github.io/nub-javadocs/nub/core/MatrixHandler.html) is implemented to pass the nub `transform` matrix to a custom shader
 
 ```java
 // excerpt of PassiveTransformations.pde
 
 Graph graph;
 Node[] nodes;
+PShader shader;
 
 void setup() {
   graph = new Graph(g, width, height);
-  GLSLMatrixHandler glslMatrixHandler = new GLSLMatrixHandler();
-  graph.setMatrixHandler(glslMatrixHandler);
+  graph.setMatrixHandler(new MatrixHandler() {
+    @Override
+    protected void _setUniforms() {
+      shader(shader);
+      Scene.setUniform(shader, "nub_transform", transform());
+    }
+  });
   ...
   //discard Processing matrices
   resetMatrix();
+  shader = loadShader("frag.glsl", "vert.glsl");
 }
 
 void draw() {
   background(0);
-  // sets up the initial nodes' matrices according to user interaction
+  // sets up the initial nub matrices according to user interaction
   graph.preDraw();
   graph.traverse();
-}
-
-public class GLSLMatrixHandler extends MatrixHandler {
-  PShader _shader;
-  PMatrix3D _pmatrix = new PMatrix3D();
-
-  public GLSLMatrixHandler() {
-    _shader = loadShader("frag.glsl", "vert.glsl");
-  }
-
-  @Override
-  protected void _setUniforms() {
-    shader(_shader);
-    //_pmatrix.set(Scene.toPMatrix(projectionModelView()));
-    //_pmatrix.transpose();
-    // same as:
-    _pmatrix.set(transform().get(new float[16]));
-    _shader.set("nub_transform", _pmatrix);
-  }
 }
 ```
 
@@ -874,7 +869,7 @@ V:
 
 Let $M$ be $ModelView(4;4)$ (i.e., it is formed by deleting row and column 4 from the ModelView)
 
-> Multiplying the input ```normal``` vector by the ```normalMatrix```, i.e., `$({M^{-1})}^T$`, yields its coordinates in the eye-node
+> Multiplying the input ```normal``` vector by the ```normalMatrix```, i.e., `$({M^{-1})}^T$`, yields its coordinates in the eye-space
 
 V:
 
@@ -1673,6 +1668,8 @@ H:
 
 ## References
 
+* [OpenGL Shading Language](https://www.khronos.org/opengl/wiki/OpenGL_Shading_Language)
+* [Data Type (GLSL)](https://www.khronos.org/opengl/wiki/Data_Type_%28GLSL%29)
 * [The Book of Shaders, by Patricio Gonzalez Vivo](http://patriciogonzalezvivo.com/2015/thebookofshaders/)
 * [Processing shaders tutorial](https://www.processing.org/tutorials/pshader/)
 * [Tutorial source code](https://github.com/codeanticode/pshader-tutorials)

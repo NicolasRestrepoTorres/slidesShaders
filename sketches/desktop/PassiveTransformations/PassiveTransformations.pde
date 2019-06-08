@@ -4,6 +4,7 @@ import nub.processing.*;
 
 Graph graph;
 Node[] nodes;
+PShader shader;
 
 void settings() {
   size(800, 800, P3D);
@@ -11,8 +12,13 @@ void settings() {
 
 void setup() {
   graph = new Graph(g, width, height);
-  GLSLMatrixHandler glslMatrixHandler = new GLSLMatrixHandler();
-  graph.setMatrixHandler(glslMatrixHandler);
+  graph.setMatrixHandler(new MatrixHandler() {
+      @Override
+      protected void _setUniforms() {
+        shader(shader);
+        Scene.setUniform(shader, "nub_transform", transform());
+      }
+    });
   graph.setFOV(PI / 3);
   graph.fit(1);
   nodes = new Node[50];
@@ -31,6 +37,7 @@ void setup() {
   }
   //discard Processing matrices
   resetMatrix();
+  shader = loadShader("frag.glsl", "vert.glsl");
 }
 
 void draw() {
@@ -55,23 +62,4 @@ void mouseDragged() {
 
 void mouseWheel(MouseEvent event) {
   graph.scale(event.getCount() * 20);
-}
-
-public class GLSLMatrixHandler extends MatrixHandler {
-  PShader _shader;
-  PMatrix3D _pmatrix = new PMatrix3D();
-
-  public GLSLMatrixHandler() {
-    _shader = loadShader("frag.glsl", "vert.glsl");
-  }
-
-  @Override
-  protected void _setUniforms() {
-    shader(_shader);
-    //_pmatrix.set(Scene.toPMatrix(projectionModelView()));
-    //_pmatrix.transpose();
-    // same as:
-    _pmatrix.set(transform().get(new float[16]));
-    _shader.set("nub_transform", _pmatrix);
-  }
 }
