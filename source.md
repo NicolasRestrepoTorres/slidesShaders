@@ -378,8 +378,8 @@ V:
 | Processing methods    | Type   | Attribute  |
 |-----------------------|:------:|:----------:|
 | `vertex()`            | `vec4` | `vertex`   |
-| `vertex()`            | `vec2` | `texCoord` |
 | `stroke()`, `fill()`  | `vec4` | `color`    |
+| `vertex()`            | `vec2` | `texCoord` |
 | `normal()`, `shape()` | `vec3` | `normal`   |
 
 V:
@@ -388,16 +388,15 @@ V:
 ### Pattern 1: Data sent from the sketch to the shaders
 #### (Frequently used) Uniform variables
 
-| Processing methods                                                 | Type        | Uniform        |
-|--------------------------------------------------------------------|:-----------:|:--------------:|
-| `orhto()`, `perspective()`                                         | `mat4`      | `projection`   |
-| `applyMatrix()`, `translate()`, `rotate()`, `scale()`              | `mat4`      | `modelview`    |
-| `applyMatrix()`, `translate()`, `rotate()`, `scale()`              | `mat3`      | `normalMatrix` |
-| `texture()`                                                        | `mat4`      | `texMatrix`    |
-| `texture()`                                                        | `sampler2D` | `texture`      |
-| `texture()`                                                        | `vec2`      | `texOffset`    |
-| `lights()`, `ambientLight()`, `spotLight()`, `directionalLight()`  | `vec4`      | `lightPosition` |
-
+| Processing methods                                                | Type        | Uniform         |
+|-------------------------------------------------------------------|:-----------:|:---------------:|
+| `orhto()`, `perspective()`                                        | `mat4`      | `projection`    |
+| `applyMatrix()`, `translate()`, `rotate()`, `scale()`             | `mat4`      | `modelview`     |
+| `applyMatrix()`, `translate()`, `rotate()`, `scale()`             | `mat3`      | `normalMatrix`  |
+| `texture()`                                                       | `mat4`      | `texMatrix`     |
+| `texture()`                                                       | `sampler2D` | `texture`       |
+| `texture()`                                                       | `vec2`      | `texOffset`     |
+| `lights()`, `ambientLight()`, `spotLight()`, `directionalLight()` | `vec4`      | `lightPosition` |
 
 V:
 
@@ -428,6 +427,17 @@ V:
   // frag.glsl
   varying <type> vert_var;
   ```
+
+V:
+
+## Shader design patterns
+### Pattern 2: Passing data among shaders
+#### (Frequently used) Varying variables
+
+| Processing methods    | Type   | Attribute  | Type   | Varying        |
+|-----------------------|:------:|:----------:|:-------|:--------------:|
+| `stroke()`, `fill()`  | `vec4` | `color`    | `vec4` | `vertColor`    |
+| `vertex()`            | `vec2` | `texCoord` | `vec4` | `vertTexCoord` |
 
 V:
 
