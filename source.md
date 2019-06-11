@@ -375,12 +375,12 @@ V:
 ### Pattern 1: Data sent from the sketch to the shaders
 #### (Frequently used) Attribute variables
 
-| Processing methods    | Type   | Attribute  |
-|-----------------------|:------:|:----------:|
-| `vertex()`            | `vec4` | `vertex`   |
-| `stroke()`, `fill()`  | `vec4` | `color`    |
-| `vertex()`            | `vec2` | `texCoord` |
-| `normal()`, `shape()` | `vec3` | `normal`   |
+| Processing methods    | Type   | Attribute                | Space     |
+|-----------------------|:------:|:------------------------:|:---------:|
+| `vertex()`            | `vec4` | `vertex` (or `position`) | _local_   |
+| `normal()`, `shape()` | `vec3` | `normal`                 | _local_   |
+| `vertex()`            | `vec2` | `texCoord`               | _texture_ |
+| `stroke()`, `fill()`  | `vec4` | `color`                  | --        |
 
 V:
 
@@ -388,15 +388,24 @@ V:
 ### Pattern 1: Data sent from the sketch to the shaders
 #### (Frequently used) Uniform variables
 
-| Processing methods                                                | Type        | Uniform         |
-|-------------------------------------------------------------------|:-----------:|:---------------:|
-| `orhto()`, `perspective()`                                        | `mat4`      | `projection`    |
-| `applyMatrix()`, `translate()`, `rotate()`, `scale()`             | `mat4`      | `modelview`     |
-| `applyMatrix()`, `translate()`, `rotate()`, `scale()`             | `mat3`      | `normalMatrix`  |
-| `texture()`                                                       | `mat4`      | `texMatrix`     |
-| `texture()`                                                       | `sampler2D` | `texture`       |
-| `texture()`                                                       | `vec2`      | `texOffset`     |
-| `lights()`, `ambientLight()`, `spotLight()`, `directionalLight()` | `vec4`      | `lightPosition` |
+| Processing methods                                                    | Type        | Uniform         |
+|-----------------------------------------------------------------------|:-----------:|:---------------:|
+| `orhto()`, `perspective()`                                            | `mat4`      | `projection`    |
+| `applyMatrix()`, `translate()`,<br>  `rotate()`, `scale()`            | `mat4`      | `modelview`     |
+| `applyMatrix()`, `translate()`,<br>  `rotate()`, `scale()`            | `mat3`      | `normalMatrix`  |
+
+V:
+
+## Shader design patterns
+### Pattern 1: Data sent from the sketch to the shaders
+#### (Frequently used) Uniform variables
+
+| Processing methods                                                    | Type        | Uniform         | Space     |
+|-----------------------------------------------------------------------|:-----------:|:---------------:|:---------:|
+| `texture()`                                                           | `mat4`      | `texMatrix`     | --        |
+| `texture()`                                                           | `sampler2D` | `texture`       | --        |
+| `texture()`                                                           | `vec2`      | `texOffset`     | _texture_ |
+| `lights()`, `ambientLight()`,<br> `spotLight()`, `directionalLight()` | `vec4`      | `lightPosition` | _eye_     |
 
 V:
 
