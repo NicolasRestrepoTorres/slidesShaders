@@ -447,6 +447,78 @@ H:
 V:
 
 ## Examples
+### Raster
+
+[Vertex shader code:](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/raster/data/vert.glsl)
+
+```glsl
+// Pattern 1: variables are sent by processing
+uniform mat4 transform;
+attribute vec4 position;
+attribute vec4 color;
+varying vec4 vertColor;
+
+void main() {
+  // Pattern 2: data among shaders
+  vertColor = color;
+  // Patter 3: consistency of geometry operations
+  // gl_Position should be defined in clipspace
+  gl_Position = transform * position;
+}
+```
+
+V:
+
+## Examples
+### Raster
+
+[Fragment shader code:](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/raster/data/frag.glsl)
+
+```glsl
+varying vec4 vertColor;
+uniform bool cmy;
+
+void main() {
+  gl_FragColor = cmy ? vec4(1-vertColor.r, 1-vertColor.g, 1-vertColor.b, vertColor.a) : vertColor;
+}
+```
+
+V:
+
+## Examples
+### Raster
+
+[raster.pde excerpt:](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/raster/raster.pde)
+
+```java
+PShader shader;
+boolean cmy;
+
+void setup() {
+  //shader = loadShader("frag.glsl", "vert.glsl");
+  // same as:
+  shader = loadShader("frag.glsl");
+  // don't forget to ask why?
+  shader(shader);
+}
+
+void draw() {
+  background(0);
+  scene.drawAxes();
+  scene.render();
+}
+
+void keyPressed() {
+  if (key == 'c') {
+    cmy = !cmy;
+    shader.set("cmy", cmy);
+  }
+}
+```
+
+V:
+
+## Examples
 ### Picking buffer
 
 <figure>
@@ -497,7 +569,7 @@ protected void _drawBackBuffer(Node node) {
   }
   ```
 
-v:
+V:
 
 ## Examples
 ### Bypassing Processing matrices
@@ -533,8 +605,6 @@ V:
 ## Examples
 ### Bypassing Processing matrices
 #### Design patterns
-
-A custom [MatrixHandler](https://visualcomputing.github.io/nub-javadocs/nub/core/MatrixHandler.html) is implemented to pass the nub `transform` matrix to a custom shader:
 
 ([PassiveTransformations.pde](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/PassiveTransformations/data/vert.glsl) excerpt)
 
