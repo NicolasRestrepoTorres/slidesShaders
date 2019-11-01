@@ -57,7 +57,7 @@ void setup() {
   //shader = loadShader("frag.glsl", "vert.glsl");
   // same as:
   shader = loadShader("frag.glsl");
-  // don't forget to ask whyy?
+  // don't forget to ask why?
   shader(shader);
 }
 
