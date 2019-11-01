@@ -434,11 +434,15 @@ V:
 <li class="fragment"> Tip 2: ```modelview * vertex``` yields the vertex coordinates in eye-space
 <li class="fragment"> Tip 3: Since the eye position is 0 in eye-space, eye-space is the usual coordinate system for geometry operations 
 
-
 H:
 
 ## Examples
-### 
+### Raster
+
+<figure>
+    <img height="400" src="fig/raster.png">
+    <figcaption>[Raster example](https://github.com/VisualComputing/Shaders/tree/gh-pages/sketches/desktop/raster)</figcaption>
+</figure>
 
 V:
 
