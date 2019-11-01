@@ -31,9 +31,9 @@ H:
 <!-- .element: class="fragment" data-fragment-index="1"-->
 2. Shader design patterns
 <!-- .element: class="fragment" data-fragment-index="1"-->
-3. The chow mein can
+3. Examples
 <!-- .element: class="fragment" data-fragment-index="1"-->
-4. Passive transformation shaders
+4. The chow mein can
 <!-- .element: class="fragment" data-fragment-index="2"-->
 5. Color shaders
 <!-- .element: class="fragment" data-fragment-index="2"-->
@@ -148,31 +148,6 @@ V:
 N:
 
 * varying variables get interpolated between the vertex and the fragment shader
-
-V:
-
-## Intro: Shader example
-
-[Nub picking buffer fragment shader](https://github.com/nakednous/nub/blob/master/data/PickingBuffer.frag)
-
-<figure>
-    <img height="400" src="fig/scenebuffers.png">
-    <figcaption>[SceneBuffers nub example](https://github.com/nakednous/nub/blob/master/examples/basics/SceneBuffers/SceneBuffers.pde)</figcaption>
-</figure>
-
-V:
-
-## Intro: Shader example
-
-[Nub picking buffer fragment shader](https://github.com/nakednous/nub/blob/master/data/PickingBuffer.frag)
-
-```glsl
-uniform vec3 id;
-
-void main() {
-  gl_FragColor = vec4(id, 1.0);
-}
-```
 
 V:
 
@@ -459,6 +434,134 @@ V:
 <li class="fragment"> Tip 2: ```modelview * vertex``` yields the vertex coordinates in eye-space
 <li class="fragment"> Tip 3: Since the eye position is 0 in eye-space, eye-space is the usual coordinate system for geometry operations 
 
+
+H:
+
+## Examples
+### 
+
+V:
+
+## Examples
+### Picking buffer
+
+<figure>
+    <img height="400" src="fig/scenebuffers.png">
+    <figcaption>[SceneBuffers nub example](https://github.com/nakednous/nub/blob/master/examples/basics/SceneBuffers/SceneBuffers.pde)</figcaption>
+</figure>
+
+V:
+
+## Examples
+### Picking buffer
+
+> Pattern 1: Data sent from the sketch to the shaders
+
+[Fragment shader code:](https://github.com/nakednous/nub/blob/master/data/PickingBuffer.frag)
+
+```glsl
+uniform vec3 id;
+
+void main() {
+  gl_FragColor = vec4(id, 1.0);
+}
+```
+
+V:
+
+## Examples
+### Picking buffer
+
+([Scene._drawBackBuffer](https://github.com/VisualComputing/nub/blob/master/src/nub/processing/Scene.java) excerpt)
+
+```java
+protected void _drawBackBuffer(Node node) {
+    PGraphics pGraphics = _backBuffer();
+    if (node.pickingThreshold() == 0) {
+      pGraphics.push();
+      // compute rgb from node id
+      float r = (float) (node.id() & 255) / 255.f;
+      float g = (float) ((node.id() >> 8) & 255) / 255.f;
+      float b = (float) ((node.id() >> 16) & 255) / 255.f;
+      // send data to shaders
+      pGraphics.shader(_triangleShader);
+      _triangleShader.set("id", new PVector(r, g, b));
+
+      ...
+      pGraphics.pop();
+    }
+  }
+  ```
+
+v:
+
+## Examples
+### Bypassing Processing matrices
+
+<figure>
+    <img height="400" src="fig/transformations.png">
+    <figcaption>Passive transformation shaders output (source code available [here](https://github.com/VisualComputing/Shaders/tree/gh-pages/sketches/desktop/PassiveTransformations))</figcaption>
+</figure>
+
+V:
+
+## Examples
+### Bypassing Processing matrices
+#### Design patterns
+
+> Pattern 1: Data sent from the sketch to the shaders
+
+([vert.glsl](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/PassiveTransformations/data/vert.glsl) excerpt)
+
+```glsl
+...
+uniform mat4 nub_transform;
+attribute vec4 vertex;
+
+void main() {
+  gl_Position = nub_transform * vertex;
+  ...
+}
+```
+
+V:
+
+## Examples
+### Bypassing Processing matrices
+#### Design patterns
+
+A custom [MatrixHandler](https://visualcomputing.github.io/nub-javadocs/nub/core/MatrixHandler.html) is implemented to pass the nub `transform` matrix to a custom shader:
+
+([PassiveTransformations.pde](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/PassiveTransformations/data/vert.glsl) excerpt)
+
+```java
+Graph graph;
+Node[] nodes;
+PShader shader;
+
+void setup() {
+  graph = new Graph(g, width, height);
+  graph.setMatrixHandler(new MatrixHandler() {
+    @Override
+    protected void _setUniforms() {
+      shader(shader);
+      Scene.setUniform(shader, "nub_transform", transform());
+    }
+  });
+  ...
+  //discard Processing matrices
+  resetMatrix();
+  shader = loadShader("frag.glsl", "vert.glsl");
+}
+
+void draw() {
+  background(0);
+  // sets up the initial nub matrices according to user interaction
+  graph.preDraw();
+  graph.render();
+}
+```
+
 H:
 
 ## The chow mein can
@@ -521,70 +624,6 @@ V:
 <a href="fig/lachoy.jpg" target="_blank"><img width="800" src="fig/lachoy.jpg"></a>
 
 (from Jason Liebig's <a href="http://www.flickr.com/photos/jasonliebigstuff/3739263136/in/photostream/" target="_blank">FLICKR collection</a> of vintage labels and wrappers)
-
-H:
-
-## Passive transformation shaders
-
-<figure>
-    <img height="400" src="fig/transformations.png">
-    <figcaption>Passive transformation shaders output (source code available [here](https://github.com/VisualComputing/Shaders/tree/gh-pages/sketches/desktop/PassiveTransformations))</figcaption>
-</figure>
-
-V:
-
-## Passive transformation shaders: Design patterns
-
-> Pattern 1: Data sent from the sketch to the shaders
-
-([vert.glsl](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/PassiveTransformations/data/vert.glsl) excerpt)
-```glsl
-...
-uniform mat4 nub_transform;
-attribute vec4 vertex;
-
-void main() {
-  gl_Position = nub_transform * vertex;
-  ...
-}
-```
-
-V:
-
-## Passive transformation shaders: Design patterns
-### [PassiveTransformations sketch](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/PassiveTransformations/PassiveTransformations.pde)
-
-A custom [MatrixHandler](https://visualcomputing.github.io/nub-javadocs/nub/core/MatrixHandler.html) is implemented to pass the nub `transform` matrix to a custom shader
-
-```java
-// excerpt of PassiveTransformations.pde
-
-Graph graph;
-Node[] nodes;
-PShader shader;
-
-void setup() {
-  graph = new Graph(g, width, height);
-  graph.setMatrixHandler(new MatrixHandler() {
-    @Override
-    protected void _setUniforms() {
-      shader(shader);
-      Scene.setUniform(shader, "nub_transform", transform());
-    }
-  });
-  ...
-  //discard Processing matrices
-  resetMatrix();
-  shader = loadShader("frag.glsl", "vert.glsl");
-}
-
-void draw() {
-  background(0);
-  // sets up the initial nub matrices according to user interaction
-  graph.preDraw();
-  graph.traverse();
-}
-```
 
 H:
 
