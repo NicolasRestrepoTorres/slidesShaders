@@ -261,7 +261,7 @@ V:
 
 > Sets the uniform variables inside the shader to modify the effect while the program is running
 
-Method signatures for vector uniform variables [boolean[], float[], int[]](https://www.khronos.org/opengl/wiki/Data_Type_%28GLSL%29#Arrays):
+Method signatures for array uniform variables [bool[], float[], int[]](https://www.khronos.org/opengl/wiki/Data_Type_%28GLSL%29#Arrays):
 
 ```processing
   .set(name, x)
