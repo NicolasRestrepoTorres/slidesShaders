@@ -1,4 +1,3 @@
- 
 // Processing specific input
 uniform float time;
 uniform vec2 resolution;

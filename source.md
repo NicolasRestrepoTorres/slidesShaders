@@ -1279,8 +1279,6 @@ uniform vec2 texOffset;
 varying vec4 vertColor;
 varying vec4 vertTexCoord;
 
-const vec4 lumcoeff = vec4(0.299, 0.587, 0.114, 0);
-
 void main() {
   vec2 tc0 = vertTexCoord.st + vec2(-texOffset.s, -texOffset.t);
   vec2 tc1 = vertTexCoord.st + vec2(         0.0, -texOffset.t);
@@ -1302,7 +1300,8 @@ void main() {
   vec4 col7 = texture2D(texture, tc7);
   vec4 col8 = texture2D(texture, tc8);
 
-  vec4 sum = 8.0 * col4 - (col0 + col1 + col2 + col3 + col5 + col6 + col7 + col8); 
+  vec4 sum = 8.0 * col4 - (col0 + col1 + col2 + col3 + col5 + col6 + col7 + col8);
+  // set the opacity to 1
   gl_FragColor = vec4(sum.rgb, 1.0) * vertColor; 
 }
 ```
