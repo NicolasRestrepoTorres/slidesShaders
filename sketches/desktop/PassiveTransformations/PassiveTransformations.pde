@@ -27,7 +27,7 @@ void setup() {
       @Override
       public void visit() {
         pushStyle();
-        fill(isTracked(graph) ? 0 : 255, 0, 255);
+        fill(isTagged(graph) ? 0 : 255, 0, 255);
         box(5);
         popStyle();
       }
@@ -48,12 +48,12 @@ void draw() {
 }
 
 void mouseMoved() {
-  graph.track(mouseX, mouseY, nodes);
+  graph.updateTag(mouseX, mouseY, nodes);
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    graph.spin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
+    graph.spin(pmouseX, pmouseY, mouseX, mouseY);
   else if (mouseButton == RIGHT)
     graph.translate(mouseX - pmouseX, mouseY - pmouseY);
   else
