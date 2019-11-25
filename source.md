@@ -70,42 +70,36 @@ V:
 ### Generating Utopia, by Stefan Wagner
 
 <iframe src="//player.vimeo.com/video/74066023" width="854" height="510" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-
 V:
 
 ## Intro: Sample projects
 ### Video portraits, by Sergio Albiac
 
 <iframe src="//player.vimeo.com/video/32760578" width="854" height="510" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-
 V:
 
 ## Intro: Sample projects
 ### Generative Typography, by Amnon Owed
 
 <iframe src="https://player.vimeo.com/video/101383026" width="854" height="478" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-
 V:
 
 ## Intro: Sample projects
 ### Unnamed soundsculpture, by Daniel Franke
 
 <iframe src="//player.vimeo.com/video/38840688" width="854" height="510" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-
 V:
 
 ## Intro: Sample projects
 ### Just Cause 2 visualization, by Jim Blackhurst
 
 <iframe width="854" height="510" src="//www.youtube.com/embed/hEoxaGkNcrg" frameborder="0" allowfullscreen></iframe>
-
 V:
 
 ## Intro: Sample projects
 ### Latent State, thesis project
 
 <iframe src="//player.vimeo.com/video/4806038" width="854" height="469" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-
 V:
 
 ## Intro: The graphics pipeline
@@ -304,6 +298,8 @@ Method signatures for _texture_ uniform variables:
 ```
 
 V:
+
+
 
 ## Intro: Processing shader API: [PShader.set()](https://processing.org/reference/PShader_set_.html)
 
@@ -567,7 +563,7 @@ protected void _drawBackBuffer(Node node) {
       pGraphics.pop();
     }
   }
-  ```
+```
 
 V:
 
@@ -1169,6 +1165,111 @@ V:
 
 > Identifying the per vertex specular shader design patterns is left as an excercise to the reader
 
+What is the [normal matrix?]([http://www.lighthouse3d.com/tutorials/glsl-12-tutorial/the-normal-matrix/][normal matrix]) 
+
+\R: A 3x3 matrix to convert the normal vector to the appropriate coordinates to perform the [lighting calculations](http://www.lighthouse3d.com/tutorials/glsl-tutorial/the-normal-matrix/).
+
+V:
+
+### Lighting parameters: per vertex specular light
+
+> Pattern 1: Passing data from the sketch to the shader
+
+```java
+// Invkoing from sketch
+
+
+void draw(){
+float [] myValue =  {-1, -1, -1, -1};
+pointLight(red, green, blue,
+x-coordinate, y-coordinate, z-coordinate);
+myShader = loadShader("myShaderFrag.glsl", "myShaderVert.glsl");
+myShader.set("myVariable", myValue);
+}
+
+```
+
+```glsl
+// taken from lightvert.glsl
+uniform mat4 modelview;
+uniform mat4 transform;
+uniform mat3 normalMatrix;
+
+uniform vec4 lightPosition;
+uniform float myValue[4];
+
+
+attribute vec4 position;
+attribute vec4 color;
+attribute vec3 normal;
+
+```
+
+V:
+
+### Lighting parameters: per vertex specular light
+
+> Pattern 1: Passing data from the sketch to the shader
+
+```glsl
+uniform int lightCount // number of active lights
+uniform vec4 lightPosition[8] // position of each light
+uniform vec3 lightNormal[8] // direction of each light (only relevant for directional and spot lights)
+uniform vec3 lightAmbient[8] // ambient component of light color
+uniform vec3 lightDiffuse[8] // diffuse component of light color
+uniform vec3 lightSpecular[8] // specular component of light color
+uniform vec3 lightFalloff[8] // light falloff coefficients
+uniform vec2 lightSpot[8] // light spot parameters (cosine of light spot angle and concentration)
+```
+
+V:
+
+### Lighting parameters: per vertex specular light
+
+> Pattern 2: Passing data among shaders
+
+Intensity: `$I = direction \bullet \hat{EyeCoordinates}$` 
+
+```glsl
+// taken from lightfrag.glsl:
+
+varying vec4 vertColor;
+
+// Vertex shader: lightvert.glsl
+void main() { 
+  vertColor = vec4(intensity, intensity, intensity, 1) * color;
+   
+}
+
+// Fragment shader : lightfrag.glsl
+void main() {
+  gl_FragColor = vertColor;
+}
+```
+
+V:
+
+### Lighting parameters: per vertex specular light
+
+> Pattern 3: Consistency of geometry operations
+
+Eye coordinates: `$ecPosition = input_{normal} \times NormalMatrix$` 
+
+```glsl
+void main() {
+  gl_Position = transform * position;
+  vec3 ecPosition = vec3(modelview * position);
+  vec3 ecNormal = normalize(normalMatrix * normal);
+
+  vec3 direction = normalize(lightPosition.xyz - ecPosition); // Pattern 3
+  float intensity = max(0.0, dot(direction, ecNormal));
+  vertColor = vec4(intensity, intensity, intensity, 1) * color;
+}
+
+```
+
+
+
 V:
 
 ## Light shaders
@@ -1185,6 +1286,80 @@ V:
 ### Lighting parameters: per pixel specular light
 
 > Identifying the per pixel specular shader design patterns is left as an excercise to the reader
+
+V:
+
+### Lighting parameters: per pixel specular light
+
+> Pattern 1: Passing data from the sketch to the shader
+
+```glsl
+// taken from vertex shader: pixlightvert.glsl:
+uniform mat4 modelview;
+uniform mat4 transform;
+uniform mat3 normalMatrix;
+
+uniform vec4 lightPosition;
+uniform vec3 lightNormal;
+
+attribute vec4 position;
+attribute vec4 color;
+attribute vec3 normal;
+
+```
+
+V:
+
+### Lighting parameters: per pixel specular light
+
+> Pattern 2: Passing data among shaders
+
+Color vertex: `$vertColor = color$` -> ```attribute vec4 color```
+
+EcNormal : `$ecNormal = \hat{v} = normalMatrix \times normal$`
+
+Direction of light: `$ lightDir = \hat{v} = Light_{position} - eyeCoordinatesPosition$ `
+
+```glsl
+// Both shaders
+
+varying vec4 vertColor;
+varying vec3 ecNormal;
+varying vec3 lightDir;
+
+```
+
+V:
+
+### Lighting parameters: per pixel specular light
+
+> Pattern 3: Consistency of geometry operations
+
+```glsl
+//Vertex shader : pixlightvert.glsl
+
+void main() {
+  gl_Position = transform * position;
+  vec3 ecPosition = vec3(modelview * position);
+
+  ecNormal = normalize(normalMatrix * normal);
+  lightDir = normalize(lightPosition.xyz - ecPosition);
+  vertColor = color;
+}
+
+//Fragment shader : pixlightfrag.glsl
+
+void main() {
+  vec3 direction = normalize(lightDir);
+  vec3 normal = normalize(ecNormal);
+  float intensity = max(0.0, dot(direction, normal));
+  gl_FragColor = vec4(intensity, intensity, intensity, 1) * vertColor;
+}
+
+
+```
+
+
 
 V:
 
